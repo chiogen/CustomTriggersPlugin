@@ -25,7 +25,8 @@ public sealed class Plugin : IDalamudPlugin
     public readonly WindowSystem WindowSystem = new("CustomTriggers");
     private ConfigWindow ConfigWindow { get; init; }
     private MainWindow MainWindow { get; init; }
-    private MessageManager MessageManager { get; set; }
+    internal MessageManager MessageManager { get; set; }
+    internal TextToSpeechService TextToSpeechService { get; set; }
 
     public Plugin()
     {
@@ -36,6 +37,7 @@ public sealed class Plugin : IDalamudPlugin
 
         ConfigWindow = new(this);
         MainWindow = new(this, goatImagePath);
+        TextToSpeechService = new(this);
 
         WindowSystem.AddWindow(ConfigWindow);
         WindowSystem.AddWindow(MainWindow);
@@ -65,7 +67,7 @@ public sealed class Plugin : IDalamudPlugin
     public void Dispose()
     {
         MessageManager.Dispose();
-        MessageManager = null!;
+        TextToSpeechService.Dispose();
 
         WindowSystem.RemoveAllWindows();
 

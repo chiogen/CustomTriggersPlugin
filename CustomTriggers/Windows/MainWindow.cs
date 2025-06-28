@@ -7,6 +7,7 @@ using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
 using ImGuiNET;
 using Lumina.Excel.Sheets;
+using Serilog;
 
 namespace CustomTriggersPlugin.Windows;
 
@@ -54,7 +55,7 @@ public class MainWindow : Window, IDisposable
         // Check if this child is drawing
         if (child.Success)
         {
-            if (ImGui.BeginTable("TriggerTable", 5))
+            if (ImGui.BeginTable("TriggerTable", 6))
             {
                 ImGui.TableHeadersRow();
                 ImGui.TableNextColumn();
@@ -67,6 +68,7 @@ public class MainWindow : Window, IDisposable
                 ImGui.Text("Pattern");
                 ImGui.TableNextColumn();
                 ImGui.Text("SoundData");
+                ImGui.TableNextColumn();
                 uint index = 0;
 
                 foreach (Trigger trigger in Plugin.Configuration.Triggers)
@@ -87,8 +89,22 @@ public class MainWindow : Window, IDisposable
                     // # Pattern
                     ImGui.TableNextColumn();
                     ImGui.Text(trigger.Pattern);
+                    // # SoundText
                     ImGui.TableNextColumn();
                     ImGui.Text(trigger.SoundData ?? "");
+                    // # Buttons
+                    ImGui.TableNextColumn();
+                    if (trigger.SoundData == null || trigger.SoundData.Length == 0)
+                        ImGui.BeginDisabled();
+                    if (ImGui.Button($"Play##{index}"))
+                    {
+                        if (trigger.SoundData != null)
+                            Plugin.TextToSpeechService.Speak(trigger.SoundData);
+                        else
+                            Log.Debug("trigger has no sounddata to play");
+                    }
+                    if (trigger.SoundData == null || trigger.SoundData.Length == 0)
+                        ImGui.EndDisabled();
                     index++;
                 }
 

@@ -1,3 +1,4 @@
+using CustomTriggersPlugin.Enums;
 using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
 using Serilog;
@@ -28,9 +29,36 @@ internal class MessageManager : IDisposable
 
     private void OnChatMessage(XivChatType type, int timestamp, ref SeString sender, ref SeString message, ref bool isHandled)
     {
-        if (Plugin.Configuration.Debug)
-            Log.Debug($"New message: {type} {sender.TextValue} {message}");
+        try
+        {
+
+            if (Plugin.Configuration.Debug)
+                Log.Debug($"New message: {ChatTypeExt.Name((ChatType)type)}({type}) {sender.TextValue} {message.TextValue}");
+
+            ProcessMessage(type, message.TextValue);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex.ToString(), ex);
+        }
     }
+
+    public void ProcessMessage(XivChatType chatType, string message)
+    {
+        // No need to do anything, if we got no triggers
+        if (Plugin.Configuration.Triggers.Count == 0)
+            return;
+
+        foreach (Trigger trigger in Plugin.Configuration.Triggers)
+        {
+            if (trigger.ChatType != null && trigger.ChatType != chatType)
+                continue;
+
+            if (trigger.Match(message))
+                Plugin.TextToSpeechService.Speak(message);
+        }
+    }
+
 
 }
 

@@ -13,6 +13,12 @@
         "requested": "[1.2.25, )",
         "resolved": "1.2.25",
         "contentHash": "xCXiw7BCxHJ8pF6wPepRUddlh2dlQlbr81gXA72hdk4FLHkKXas7EH/n+fk5UCA/YfMqG1Z6XaPiUjDbUNBUzg=="
+      },
+      "System.Speech": {
+        "type": "Direct",
+        "requested": "[9.0.6, )",
+        "resolved": "9.0.6",
+        "contentHash": "Cyc9GLB8OpPNFFSlvnaLzkLSyGCuIENllB47w0WwP+SzVfDWvGdTEK1iIaMQEoRjpdl4sRYrchCDYx6GqNlu/w=="
       }
     }
   }
