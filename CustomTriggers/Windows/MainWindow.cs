@@ -1,23 +1,25 @@
 using System;
 using System.Numerics;
+using CustomTriggersPlugin.Enums;
+using Dalamud.Game.Text;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
 using ImGuiNET;
 using Lumina.Excel.Sheets;
 
-namespace CustomTriggers.Windows;
+namespace CustomTriggersPlugin.Windows;
 
 public class MainWindow : Window, IDisposable
 {
-    private string GoatImagePath;
-    private Plugin Plugin;
+    private string GoatImagePath { get; }
+    private Plugin Plugin { get; }
 
     // We give this window a hidden ID using ##
     // So that the user will see "My Amazing Window" as window title,
     // but for ImGui the ID is "My Amazing Window##With a hidden ID"
     public MainWindow(Plugin plugin, string goatImagePath)
-        : base("My Amazing Window##With a hidden ID", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse)
+        : base("Triggers", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse)
     {
         SizeConstraints = new WindowSizeConstraints
         {
@@ -37,7 +39,6 @@ public class MainWindow : Window, IDisposable
         // These expect formatting parameter if any part of the text contains a "%", which we can't
         // provide through our bindings, leading to a Crash to Desktop.
         // Replacements can be found in the ImGuiHelpers Class
-        ImGui.TextUnformatted($"The random config bool is {Plugin.Configuration.SomePropertyToBeSavedAndWithADefault}");
 
         if (ImGui.Button("Show Settings"))
         {
@@ -49,57 +50,50 @@ public class MainWindow : Window, IDisposable
         // Normally a BeginChild() would have to be followed by an unconditional EndChild(),
         // ImRaii takes care of this after the scope ends.
         // This works for all ImGui functions that require specific handling, examples are BeginTable() or Indent().
-        using (var child = ImRaii.Child("SomeChildWithAScrollbar", Vector2.Zero, true))
+        using var child = ImRaii.Child("TriggerTableContainer", Vector2.Zero, true);
+        // Check if this child is drawing
+        if (child.Success)
         {
-            // Check if this child is drawing
-            if (child.Success)
+            if (ImGui.BeginTable("TriggerTable", 5))
             {
-                ImGui.TextUnformatted("Have a goat:");
-                var goatImage = Plugin.TextureProvider.GetFromFile(GoatImagePath).GetWrapOrDefault();
-                if (goatImage != null)
+                ImGui.TableHeadersRow();
+                ImGui.TableNextColumn();
+                ImGui.Text("#");
+                ImGui.TableNextColumn();
+                ImGui.Text("Key");
+                ImGui.TableNextColumn();
+                ImGui.Text("ChatType");
+                ImGui.TableNextColumn();
+                ImGui.Text("Pattern");
+                ImGui.TableNextColumn();
+                ImGui.Text("SoundData");
+                uint index = 0;
+
+                foreach (Trigger trigger in Plugin.Configuration.Triggers)
                 {
-                    using (ImRaii.PushIndent(55f))
-                    {
-                        ImGui.Image(goatImage.ImGuiHandle, new Vector2(goatImage.Width, goatImage.Height));
-                    }
-                }
-                else
-                {
-                    ImGui.TextUnformatted("Image not found.");
+                    ImGui.TableNextRow();
+                    // # index
+                    ImGui.TableNextColumn();
+                    ImGui.Text(index.ToString());
+                    // # Key
+                    ImGui.TableNextColumn();
+                    ImGui.Text(trigger.Key);
+                    // # ChatType
+                    ImGui.TableNextColumn();
+                    if (trigger.ChatType != null)
+                        ImGui.Text(ChatTypeExt.Name((ChatType)trigger.ChatType));
+                    else
+                        ImGui.Text("None");
+                    // # Pattern
+                    ImGui.TableNextColumn();
+                    ImGui.Text(trigger.Pattern);
+                    ImGui.TableNextColumn();
+                    ImGui.Text(trigger.SoundData ?? "");
+                    index++;
                 }
 
-                ImGuiHelpers.ScaledDummy(20.0f);
 
-                // Example for other services that Dalamud provides.
-                // ClientState provides a wrapper filled with information about the local player object and client.
-
-                var localPlayer = Plugin.ClientState.LocalPlayer;
-                if (localPlayer == null)
-                {
-                    ImGui.TextUnformatted("Our local player is currently not loaded.");
-                    return;
-                }
-
-                if (!localPlayer.ClassJob.IsValid)
-                {
-                    ImGui.TextUnformatted("Our current job is currently not valid.");
-                    return;
-                }
-
-                // ExtractText() should be the preferred method to read Lumina SeStrings,
-                // as ToString does not provide the actual text values, instead gives an encoded macro string.
-                ImGui.TextUnformatted($"Our current job is ({localPlayer.ClassJob.RowId}) \"{localPlayer.ClassJob.Value.Abbreviation.ExtractText()}\"");
-
-                // Example for quarrying Lumina directly, getting the name of our current area.
-                var territoryId = Plugin.ClientState.TerritoryType;
-                if (Plugin.DataManager.GetExcelSheet<TerritoryType>().TryGetRow(territoryId, out var territoryRow))
-                {
-                    ImGui.TextUnformatted($"We are currently in ({territoryId}) \"{territoryRow.PlaceName.Value.Name.ExtractText()}\"");
-                }
-                else
-                {
-                    ImGui.TextUnformatted("Invalid territory.");
-                }
+                ImGui.EndTable();
             }
         }
     }

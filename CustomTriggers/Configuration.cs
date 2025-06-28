@@ -1,16 +1,28 @@
-﻿using Dalamud.Configuration;
+using Dalamud.Configuration;
 using Dalamud.Plugin;
 using System;
+using System.Collections.Generic;
 
-namespace CustomTriggers;
+namespace CustomTriggersPlugin;
 
 [Serializable]
 public class Configuration : IPluginConfiguration
 {
     public int Version { get; set; } = 0;
 
-    public bool IsConfigWindowMovable { get; set; } = true;
-    public bool SomePropertyToBeSavedAndWithADefault { get; set; } = true;
+    public List<Trigger> Triggers { get; set; } = [];
+
+    public bool Debug { get; set; } = true;
+
+    public Configuration()
+    {
+        Triggers.Add(new Trigger()
+        {
+            Name = "test",
+            Pattern = "test",
+        });
+    }
+
 
     // the below exist just to make saving less cumbersome
     public void Save()
