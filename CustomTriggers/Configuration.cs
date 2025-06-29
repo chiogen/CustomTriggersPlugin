@@ -14,15 +14,6 @@ public class Configuration : IPluginConfiguration
 
     public bool Debug { get; set; } = true;
 
-    public Configuration()
-    {
-        Triggers.Add(new Trigger()
-        {
-            Name = "test",
-            Pattern = "test",
-        });
-    }
-
 
     // the below exist just to make saving less cumbersome
     public void Save()

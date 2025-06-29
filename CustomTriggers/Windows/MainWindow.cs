@@ -72,45 +72,88 @@ public class MainWindow : Window, IDisposable
                 uint index = 0;
 
                 foreach (Trigger trigger in Plugin.Configuration.Triggers)
-                {
-                    ImGui.TableNextRow();
-                    // # index
-                    ImGui.TableNextColumn();
-                    ImGui.Text(index.ToString());
-                    // # Key
-                    ImGui.TableNextColumn();
-                    ImGui.Text(trigger.Key);
-                    // # ChatType
-                    ImGui.TableNextColumn();
-                    if (trigger.ChatType != null)
-                        ImGui.Text(ChatTypeExt.Name((ChatType)trigger.ChatType));
-                    else
-                        ImGui.Text("None");
-                    // # Pattern
-                    ImGui.TableNextColumn();
-                    ImGui.Text(trigger.Pattern);
-                    // # SoundText
-                    ImGui.TableNextColumn();
-                    ImGui.Text(trigger.SoundData ?? "");
-                    // # Buttons
-                    ImGui.TableNextColumn();
-                    if (trigger.SoundData == null || trigger.SoundData.Length == 0)
-                        ImGui.BeginDisabled();
-                    if (ImGui.Button($"Play##{index}"))
-                    {
-                        if (trigger.SoundData != null)
-                            Plugin.TextToSpeechService.Speak(trigger.SoundData);
-                        else
-                            Log.Debug("trigger has no sounddata to play");
-                    }
-                    if (trigger.SoundData == null || trigger.SoundData.Length == 0)
-                        ImGui.EndDisabled();
-                    index++;
-                }
-
+                    RenderTriggerRow(trigger, index++);
 
                 ImGui.EndTable();
             }
+        }
+    }
+
+    private void RenderTriggerRow(Trigger trigger, uint no)
+    {
+        // # Start row
+        ImGui.TableNextRow();
+
+        // # index
+        ImGui.TableNextColumn();
+        ImGui.Text(no.ToString());
+
+        // # Key
+        ImGui.TableNextColumn();
+        ImGui.Text(trigger.Key);
+
+        // # ChatType
+        ImGui.TableNextColumn();
+        RenderChatTypeDropDown(trigger, no);
+
+        // # Pattern
+        ImGui.TableNextColumn();
+        ImGui.Text(trigger.Pattern);
+
+        // # SoundText
+        ImGui.TableNextColumn();
+        ImGui.Text(trigger.SoundData ?? "");
+
+        // # Buttons
+        ImGui.TableNextColumn();
+        if (trigger.SoundData == null || trigger.SoundData.Length == 0)
+            ImGui.BeginDisabled();
+        if (ImGui.Button($"Play##playbtn-{no}"))
+        {
+            if (trigger.SoundData != null)
+                Plugin.TextToSpeechService.Speak(trigger.SoundData);
+            else
+                Log.Debug("trigger has no sounddata to play");
+        }
+        if (trigger.SoundData == null || trigger.SoundData.Length == 0)
+            ImGui.EndDisabled();
+
+    }
+
+    private void RenderChatTypeDropDown(Trigger trigger, uint no)
+    {
+        string currentValue = trigger.ChatType == null
+            ? "None"
+            : ChatTypeExt.Name((ChatType)trigger.ChatType);
+
+        ChatType? selectedValue = trigger.ChatType;
+
+        if (ImGui.BeginCombo($"##cbox-{no}", currentValue))
+        {
+
+            bool noneSelected = trigger.ChatType == null;
+            if (ImGui.Selectable($"None##clear-{no}", selectedValue == null))
+                selectedValue = null;
+            if (noneSelected)
+                ImGui.SetItemDefaultFocus();
+
+            foreach (ChatType value in Enum.GetValues<ChatType>())
+            {
+                bool isSelected = value == trigger.ChatType;
+                if (ImGui.Selectable(ChatTypeExt.Name(value), isSelected))
+                    selectedValue = value;
+                if (isSelected)
+                    ImGui.SetItemDefaultFocus();
+            }
+
+            ImGui.EndCombo();
+        }
+
+        // Update config when value has changed
+        if (selectedValue != trigger.ChatType)
+        {
+            trigger.ChatType = selectedValue;
+            Plugin.Configuration.Save();
         }
     }
 }
