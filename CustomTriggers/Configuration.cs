@@ -12,7 +12,7 @@ public class Configuration : IPluginConfiguration
 
     public List<Trigger> Triggers { get; set; } = [];
 
-    public bool Debug { get; set; } = true;
+    public bool Debug { get; set; } = false;
 
 
     // the below exist just to make saving less cumbersome
