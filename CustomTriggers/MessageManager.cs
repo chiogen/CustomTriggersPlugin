@@ -52,7 +52,7 @@ internal class MessageManager : IDisposable
                 continue;
 
             if (Regex.IsMatch(message, trigger.Pattern))
-                Plugin.TextToSpeechService.Speak(message);
+                Plugin.TextToSpeechService.Speak(trigger.SoundData ?? message);
         }
     }
 
