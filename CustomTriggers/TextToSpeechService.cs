@@ -31,6 +31,7 @@ internal class TextToSpeechService : IDisposable
 
     public void Dispose()
     {
+        Synthesizer.SpeakAsyncCancelAll();
         Synthesizer.Dispose();
     }
 
@@ -41,7 +42,7 @@ internal class TextToSpeechService : IDisposable
             if (Plugin.Configuration.Debug)
                 Log.Debug($"Sending message to synthesizer: {message}");
 
-            //Synthesizer.SpeakAsyncCancelAll();
+            Synthesizer.SpeakAsyncCancelAll();
             Synthesizer.SpeakAsync(message);
         }
         catch (Exception ex)
