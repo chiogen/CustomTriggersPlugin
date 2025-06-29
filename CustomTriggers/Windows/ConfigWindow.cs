@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using System.Numerics;
+using CustomTriggersPlugin.Enums;
 using Dalamud.Interface.Windowing;
 using ImGuiNET;
 
@@ -63,13 +64,14 @@ public class ConfigWindow : Window, IDisposable
         {
             Key = "DeepDungeon",
             Name = name,
+            ChatType = (ChatType)2105,
             Pattern = pattern,
             SoundData = soundData
         });
 
         var addItem = (string itemName, string? soundData) => add(itemName, $"You return the (protomander|pomander) of {itemName} to the coffer. You cannot carry any more of that item.", soundData ?? itemName);
 
-        add("Exit", "The (Pylon|Cairn) of Passage is activated\\!", "Exit");
+        add("Exit", "The (Pylon|Cairn|Beacon) of Passage is activated\\!", "Exit");
         add("Safety", "All the traps on this floor have disappeared\\!", "Safety up");
 
         addItem("affluence", null);
