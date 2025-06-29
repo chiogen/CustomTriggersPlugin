@@ -1,0 +1,22 @@
+[
+    {
+        "Author": "Me",
+        "Name": "Custom Triggers",
+        "InternalName": "CustomTriggersPlugin",
+        "AssemblyVersion": "0.0.0.1",
+        "RepoUrl": "https://github.com/chiogen/CustomTriggersPlugin",
+        "Description": "Custom Triggers like in ACT",
+        "ApplicableVersion": "any",
+        "Tags": [
+            "custom triggers",
+            "Deep Dungeon"
+        ],
+        "DalamudApiLevel": 12,
+        "LoadRequiredState": 0,
+        "LoadSync": false,
+        "CanUnloadAsync": false,
+        "LoadPriority": 0,
+        "Punchline": "Custom Triggers like in ACT",
+        "AcceptsFeedback": true
+    }
+]
