@@ -3,6 +3,7 @@ using System;
 
 namespace CustomTriggersPlugin;
 
+[Serializable]
 public class Trigger
 {
     public string Key { get; set; } = "custom";
