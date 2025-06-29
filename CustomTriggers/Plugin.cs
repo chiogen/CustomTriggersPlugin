@@ -36,7 +36,7 @@ public sealed class Plugin : IDalamudPlugin
         string goatImagePath = Path.Combine(PluginInterface.AssemblyLocation.Directory?.FullName!, "goat.png");
 
         ConfigWindow = new(this);
-        MainWindow = new(this, goatImagePath);
+        MainWindow = new(this);
         TextToSpeechService = new(this);
 
         WindowSystem.AddWindow(ConfigWindow);

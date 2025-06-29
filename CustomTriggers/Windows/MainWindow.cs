@@ -10,13 +10,12 @@ namespace CustomTriggersPlugin.Windows;
 
 public class MainWindow : Window, IDisposable
 {
-    private string GoatImagePath { get; }
     private Plugin Plugin { get; }
 
     // We give this window a hidden ID using ##
     // So that the user will see "My Amazing Window" as window title,
     // but for ImGui the ID is "My Amazing Window##With a hidden ID"
-    public MainWindow(Plugin plugin, string goatImagePath)
+    public MainWindow(Plugin plugin)
         : base("Triggers", ImGuiWindowFlags.NoScrollbar | ImGuiWindowFlags.NoScrollWithMouse)
     {
         SizeConstraints = new WindowSizeConstraints
@@ -25,7 +24,6 @@ public class MainWindow : Window, IDisposable
             MaximumSize = new Vector2(float.MaxValue, float.MaxValue)
         };
 
-        GoatImagePath = goatImagePath;
         Plugin = plugin;
     }
 
@@ -44,6 +42,11 @@ public class MainWindow : Window, IDisposable
         }
 
         ImGui.Spacing();
+        RenderTriggersTable();
+    }
+
+    private void RenderTriggersTable()
+    {
 
         // Normally a BeginChild() would have to be followed by an unconditional EndChild(),
         // ImRaii takes care of this after the scope ends.
@@ -74,8 +77,8 @@ public class MainWindow : Window, IDisposable
                 ImGui.EndTable();
             }
         }
-    }
 
+    }
     private void RenderTriggerRow(Trigger trigger, uint no)
     {
         // # Start row
@@ -116,7 +119,6 @@ public class MainWindow : Window, IDisposable
             ImGui.EndDisabled();
 
     }
-
     private void RenderChatTypeDropDown(Trigger trigger, uint no)
     {
         string currentValue = trigger.ChatType == null
