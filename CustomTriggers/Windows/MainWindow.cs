@@ -186,9 +186,8 @@ public class MainWindow : Window, IDisposable
             Plugin.Configuration.Save();
         }
 
-
     }
-    private bool RenderChatTypeDropDown(uint rowIndex, ref ChatType? currentValue, bool disabled)
+    private static bool RenderChatTypeDropDown(uint rowIndex, ref ChatType? currentValue, bool disabled)
     {
         bool valueChanged = false;
 

@@ -1,11 +1,14 @@
 {
-  "Author": "your name here",
-  "Name": "Custom Triggers",
-  "Punchline": "Custom Triggers like in ACT",
-  "Description": "Custom Triggers like in ACT",
-  "ApplicableVersion": "any",
-  "Tags": [
-    "custom triggers",
-    "plugin"
-  ]
+    "Author": "Me",
+    "Name": "Custom Triggers",
+    "Punchline": "Custom Triggers like in ACT",
+    "Description": "Custom Triggers like in ACT",
+    "ApplicableVersion": "any",
+    "InternalName": "CustomTriggers",
+    "AssemblyVersion": "0.0.0.1",
+    "Tags": [
+        "custom triggers",
+        "Deep Dungeon"
+    ],
+    "DalamudApiLevel": 12
 }
