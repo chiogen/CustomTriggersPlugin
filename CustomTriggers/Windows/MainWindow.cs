@@ -55,38 +55,36 @@ public class MainWindow : Window, IDisposable
         // Check if this child is drawing
         if (child.Success)
         {
+            ImGui.PushStyleVar(ImGuiStyleVar.CellPadding, new Vector2(10, 2)); // X and Y padding
+
             if (ImGui.BeginTable("TriggerTable", 6))
             {
+                ImGui.TableSetupColumn("#", ImGuiTableColumnFlags.WidthFixed, 30f);
+                ImGui.TableSetupColumn("Key", ImGuiTableColumnFlags.WidthFixed, 150f);
+                ImGui.TableSetupColumn("ChatType", ImGuiTableColumnFlags.WidthFixed, 150f);
+                ImGui.TableSetupColumn("Pattern", ImGuiTableColumnFlags.WidthStretch);
+                ImGui.TableSetupColumn("SoundData", ImGuiTableColumnFlags.WidthStretch);
+                ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthFixed, 100f);
                 ImGui.TableHeadersRow();
-                ImGui.TableNextColumn();
-                ImGui.Text("#");
-                ImGui.TableNextColumn();
-                ImGui.Text("Key");
-                ImGui.TableNextColumn();
-                ImGui.Text("ChatType");
-                ImGui.TableNextColumn();
-                ImGui.Text("Pattern");
-                ImGui.TableNextColumn();
-                ImGui.Text("SoundData");
-                ImGui.TableNextColumn();
-                uint index = 0;
+                uint rowIndex = 0;
 
                 foreach (Trigger trigger in Plugin.Configuration.Triggers)
-                    RenderTriggerRow(trigger, index++);
+                    RenderTriggerRow(trigger, rowIndex++);
 
                 ImGui.EndTable();
+                ImGui.PopStyleVar();
             }
         }
 
     }
-    private void RenderTriggerRow(Trigger trigger, uint no)
+    private void RenderTriggerRow(Trigger trigger, uint rowIndex)
     {
         // # Start row
         ImGui.TableNextRow();
 
         // # index
         ImGui.TableNextColumn();
-        ImGui.Text(no.ToString());
+        ImGui.Text(rowIndex.ToString());
 
         // # Key
         ImGui.TableNextColumn();
@@ -94,7 +92,7 @@ public class MainWindow : Window, IDisposable
 
         // # ChatType
         ImGui.TableNextColumn();
-        RenderChatTypeDropDown(trigger, no);
+        RenderChatTypeDropDown(trigger, rowIndex);
 
         // # Pattern
         ImGui.TableNextColumn();
@@ -108,7 +106,7 @@ public class MainWindow : Window, IDisposable
         ImGui.TableNextColumn();
         if (trigger.SoundData == null || trigger.SoundData.Length == 0)
             ImGui.BeginDisabled();
-        if (ImGui.Button($"Play##playbtn-{no}"))
+        if (ImGui.Button($"Play##playbtn-{rowIndex}"))
         {
             if (trigger.SoundData != null)
                 Plugin.TextToSpeechService.Speak(trigger.SoundData);
@@ -119,7 +117,7 @@ public class MainWindow : Window, IDisposable
             ImGui.EndDisabled();
 
     }
-    private void RenderChatTypeDropDown(Trigger trigger, uint no)
+    private void RenderChatTypeDropDown(Trigger trigger, uint rowIndex)
     {
         string currentValue = trigger.ChatType == null
             ? "None"
@@ -127,13 +125,15 @@ public class MainWindow : Window, IDisposable
 
         ChatType? selectedValue = trigger.ChatType;
 
-        if (ImGui.BeginCombo($"##cbox-{no}", currentValue))
+        ImGui.SetNextItemWidth(-1);
+
+        if (ImGui.BeginCombo($"##cbox-{rowIndex}", currentValue))
         {
 
             bool noneSelected = trigger.ChatType == null;
-            if (ImGui.Selectable($"None##clear-{no}", selectedValue == null))
+            if (ImGui.Selectable($"None##clear-{rowIndex}", noneSelected))
                 selectedValue = null;
-            if (noneSelected)
+            if (trigger.ChatType == null)
                 ImGui.SetItemDefaultFocus();
 
             foreach (ChatType value in Enum.GetValues<ChatType>())
