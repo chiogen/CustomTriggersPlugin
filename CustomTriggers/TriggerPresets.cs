@@ -52,7 +52,7 @@ internal static class TriggerPresets
         addItem("resolution", "reso");
 
         add("Magicite", "You obtain a splinter of (Crag|Vortex|Elder|Inferno) magicite\\.", "Magicite");
-        add("Dread", "A dread beast stalks this floor\\.\\.\\.", "Dread");
+        add("DreadBeast", "A dread beast stalks this floor\\.\\.\\.", "Danger");
 
         return triggers;
     }
