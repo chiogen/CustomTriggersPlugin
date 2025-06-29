@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -55,7 +56,7 @@ internal class MessageManager : IDisposable
             if (trigger.ChatType != null && trigger.ChatType != chatType)
                 continue;
 
-            if (trigger.Match(message))
+            if (Regex.IsMatch(message, trigger.Pattern))
                 Plugin.TextToSpeechService.Speak(message);
         }
     }
