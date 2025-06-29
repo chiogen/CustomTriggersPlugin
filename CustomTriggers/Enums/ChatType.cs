@@ -1,5 +1,3 @@
-using Dalamud.Game.Config;
-
 namespace CustomTriggersPlugin.Enums;
 
 [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1028:Enum Storage should be Int32")]
