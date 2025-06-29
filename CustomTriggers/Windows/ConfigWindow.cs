@@ -37,7 +37,7 @@ public class ConfigWindow : Window, IDisposable
     {
         // can't ref a property, so use a local copy
         bool debugValue = Configuration.Debug;
-        if (ImGui.Checkbox("Debug Mode", ref debugValue))
+        if (ImGui.Checkbox("Debug Mode##chkDebugMode", ref debugValue))
         {
             Configuration.Debug = debugValue;
             Configuration.Save();
@@ -45,7 +45,7 @@ public class ConfigWindow : Window, IDisposable
 
         //
         int volume = Configuration.Volume;
-        if (ImGui.SliderInt("Volume", ref volume, 0, 100))
+        if (ImGui.SliderInt("Volume##volumeSlider", ref volume, 0, 100))
         {
             Configuration.Volume = volume;
             Configuration.Save();
@@ -55,61 +55,21 @@ public class ConfigWindow : Window, IDisposable
         bool hasDeepDungeonTriggers = Configuration.Triggers.Any(t => t.Key == "DeepDungeon");
         if (hasDeepDungeonTriggers)
             ImGui.BeginDisabled();
-        if (ImGui.Button("Add DeepDungeon triggers"))
+        if (ImGui.Button("Add DeepDungeon triggers##addDDTriggers"))
             AddDeepDungeonTriggers();
         if (hasDeepDungeonTriggers)
             ImGui.EndDisabled();
 
         //
-        if (ImGui.Button("Clear Triggers"))
+        if (ImGui.Button("Clear Triggers##clearAllTriggers"))
             ClearTriggers();
 
     }
 
     private void AddDeepDungeonTriggers()
     {
-        var add = (string name, string pattern, string soundData) => Configuration.Triggers.Add(new()
-        {
-            Key = "DeepDungeon",
-            Name = name,
-            ChatType = (ChatType)2105,
-            Pattern = pattern,
-            SoundData = soundData
-        });
-
-        var addItem = (string itemName, string? soundData) => add(itemName, $"You return the (protomander|pomander) of {itemName} to the coffer. You cannot carry any more of that item.", soundData ?? itemName);
-
-        add("Exit", "The (Pylon|Cairn|Beacon) of Passage is activated\\!", "Exit");
-        add("Safety", "All the traps on this floor have disappeared\\!", "Safety up");
-
-        addItem("affluence", null);
-        addItem("alteration", null);
-        addItem("flight", null);
-        addItem("fortune", null);
-        addItem("intuition", null);
-        addItem("purity", null);
-        addItem("raising", null);
-        addItem("safety", null);
-        addItem("serenity", null);
-        addItem("sight", null);
-        addItem("steel", null);
-        addItem("strength", null);
-        addItem("witching", null);
-        addItem("beast", null);
-        addItem("lethargy", null);
-        addItem("storms", null);
-        addItem("frailty", null);
-        addItem("concealment", "conceal");
-        addItem("petrification", "petri");
-        addItem("lust", null);
-        addItem("rage", null);
-        addItem("resolution", "reso");
-
-        add("Magicite", "You obtain a splinter of (Crag|Vortex|Elder|Inferno) magicite\\.", "Magicite");
-        add("Dread", "A dread beast stalks this floor\\.\\.\\.", "Dread");
-
+        Configuration.Triggers.AddRange(TriggerPresets.GetDeepDungeonTriggers());
         Configuration.Save();
-
     }
 
     private void ClearTriggers()

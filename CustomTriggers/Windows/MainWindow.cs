@@ -1,6 +1,7 @@
 using System;
 using System.Numerics;
 using CustomTriggersPlugin.Enums;
+using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
 using ImGuiNET;
@@ -36,15 +37,17 @@ public class MainWindow : Window, IDisposable
         // provide through our bindings, leading to a Crash to Desktop.
         // Replacements can be found in the ImGuiHelpers Class
 
-        if (ImGui.Button("Show Settings"))
-        {
-            Plugin.ToggleConfigUI();
-        }
-
+        RenderTopBar();
         ImGui.Spacing();
         RenderTriggersTable();
     }
+    private void RenderTopBar()
+    {
 
+
+        if (ImGui.Button("Show Settings"))
+            Plugin.ToggleConfigUI();
+    }
     private void RenderTriggersTable()
     {
 
@@ -63,7 +66,7 @@ public class MainWindow : Window, IDisposable
                 ImGui.TableSetupColumn("Key", ImGuiTableColumnFlags.WidthFixed, 150f);
                 ImGui.TableSetupColumn("ChatType", ImGuiTableColumnFlags.WidthFixed, 150f);
                 ImGui.TableSetupColumn("Pattern", ImGuiTableColumnFlags.WidthStretch);
-                ImGui.TableSetupColumn("SoundData", ImGuiTableColumnFlags.WidthStretch);
+                ImGui.TableSetupColumn("SoundData", ImGuiTableColumnFlags.WidthFixed, 200f);
                 ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthFixed, 100f);
                 ImGui.TableHeadersRow();
                 uint rowIndex = 0;
@@ -71,7 +74,7 @@ public class MainWindow : Window, IDisposable
                 foreach (Trigger trigger in Plugin.Configuration.Triggers)
                     RenderTriggerRow(trigger, rowIndex++);
 
-                RenderNewEntryRow();
+                RenderNewEntryRow(rowIndex++);
 
                 ImGui.EndTable();
                 ImGui.PopStyleVar();
@@ -90,29 +93,35 @@ public class MainWindow : Window, IDisposable
 
         // # index
         ImGui.TableNextColumn();
-        ImGui.Text(rowIndex.ToString());
+        ImGuiHelpers.SafeTextWrapped(rowIndex.ToString());
 
         // # Key
         ImGui.TableNextColumn();
-        ImGui.Text(trigger.Key);
+        ImGuiHelpers.SafeTextWrapped(trigger.Key);
 
         // # ChatType
         ImGui.TableNextColumn();
-        RenderChatTypeDropDown(trigger, rowIndex);
+        ChatType? chatType = trigger.ChatType;
+        if (RenderChatTypeDropDown(rowIndex, ref chatType))
+        {
+            trigger.ChatType = chatType;
+            Plugin.Configuration.Save();
+        }
 
         // # Pattern
         ImGui.TableNextColumn();
-        ImGui.Text(trigger.Pattern);
+        ImGuiHelpers.SafeTextWrapped(trigger.Pattern);
 
         // # SoundText
         ImGui.TableNextColumn();
-        ImGui.Text(trigger.SoundData ?? "");
+        ImGuiHelpers.SafeTextWrapped(trigger.SoundData ?? "");
 
         if (trigger.Key != "custom")
             ImGui.EndDisabled();
 
-        // # Buttons
+        // # Buttons Cell (render all buttons into 1 cell)
         ImGui.TableNextColumn();
+        // # Play button
         if (ImGui.Button($"Play##playbtn-{rowIndex}"))
         {
             if (trigger.SoundData != null)
@@ -120,48 +129,101 @@ public class MainWindow : Window, IDisposable
             else
                 Log.Debug("trigger has no sounddata to play");
         }
+        // Delete Button
+        ImGui.SameLine();
+        if (trigger.Key != "custom")
+            ImGui.BeginDisabled();
+        if (ImGui.Button($"Del##btnDel-{rowIndex}"))
+        {
+            Plugin.Configuration.Triggers.Remove(trigger);
+            Plugin.Configuration.Save();
+        }
+        if (trigger.Key != "custom")
+            ImGui.EndDisabled();
+
+
 
     }
-    private void RenderNewEntryRow()
-    {
-        string key = "";
-        string pattern = "";
-        string soundData = "";
 
+    private Trigger draftTrigger = new();
+    private void RenderNewEntryRow(uint rowIndex)
+    {
         ImGui.TableNextRow();
 
+        // # no
+        ImGui.TableNextColumn();
+        ImGuiHelpers.SafeTextWrapped("#");
+
+        // # key
         ImGui.TableNextColumn();
         ImGui.Text("custom");
 
+        // # ChatType
         ImGui.TableNextColumn();
-        ImGui.InputText("##inputKey", ref key, 20);
+        ChatType? chatType = draftTrigger.ChatType;
+        if (RenderChatTypeDropDown(rowIndex, ref chatType))
+            draftTrigger.ChatType = chatType;
+
+        // # Pattern
+        ImGui.TableNextColumn();
+        ImGui.SetNextItemWidth(-1);
+        string pattern = draftTrigger.Pattern;
+        if (ImGui.InputText("##inputPattern", ref pattern, 20))
+            draftTrigger.Pattern = pattern;
+
+        // # SoundData
+        ImGui.TableNextColumn();
+        ImGui.SetNextItemWidth(-1);
+        string soundData = draftTrigger.SoundData;
+        if (ImGui.InputText("##inputSoundData", ref soundData, 20))
+            draftTrigger.SoundData = soundData;
+
+        // # Add Button
+        ImGui.TableNextColumn();
+        bool dataValid = pattern.Length > 0 && soundData.Length > 0;
+        if (!dataValid)
+            ImGui.BeginDisabled();
+        if (ImGui.Button("+##btnAddEntry"))
+        {
+            Plugin.Configuration.Triggers.Add(draftTrigger);
+            draftTrigger = new();
+            Plugin.Configuration.Save();
+        }
+        if (!dataValid)
+            ImGui.EndDisabled();
 
 
     }
-    private void RenderChatTypeDropDown(Trigger trigger, uint rowIndex)
+    private bool RenderChatTypeDropDown(uint rowIndex, ref ChatType? currentValue)
     {
-        string currentValue = trigger.ChatType == null
-            ? "None"
-            : ChatTypeExt.Name((ChatType)trigger.ChatType);
+        bool valueChanged = false;
 
-        ChatType? selectedValue = trigger.ChatType;
+        string currentValueText = "None";
+        if (currentValue != null)
+            currentValueText = ChatTypeExt.Name(currentValue.Value);
 
         ImGui.SetNextItemWidth(-1);
 
-        if (ImGui.BeginCombo($"##cbox-{rowIndex}", currentValue))
+        if (ImGui.BeginCombo($"##cbox-{rowIndex}", currentValueText))
         {
 
-            bool noneSelected = trigger.ChatType == null;
+            bool noneSelected = currentValue == null;
             if (ImGui.Selectable($"None##clear-{rowIndex}", noneSelected))
-                selectedValue = null;
-            if (trigger.ChatType == null)
+            {
+                currentValue = null;
+                valueChanged = true;
+            }
+            if (currentValue == null)
                 ImGui.SetItemDefaultFocus();
 
             foreach (ChatType value in Enum.GetValues<ChatType>())
             {
-                bool isSelected = value == trigger.ChatType;
+                bool isSelected = value == currentValue;
                 if (ImGui.Selectable(ChatTypeExt.Name(value), isSelected))
-                    selectedValue = value;
+                {
+                    currentValue = value;
+                    valueChanged = true;
+                }
                 if (isSelected)
                     ImGui.SetItemDefaultFocus();
             }
@@ -169,12 +231,7 @@ public class MainWindow : Window, IDisposable
             ImGui.EndCombo();
         }
 
-        // Update config when value has changed
-        if (selectedValue != trigger.ChatType)
-        {
-            trigger.ChatType = selectedValue;
-            Plugin.Configuration.Save();
-        }
+        return valueChanged;
     }
 
 }

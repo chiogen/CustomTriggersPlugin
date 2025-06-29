@@ -1,4 +1,5 @@
 using CustomTriggersPlugin.Enums;
+using System;
 
 namespace CustomTriggersPlugin;
 
