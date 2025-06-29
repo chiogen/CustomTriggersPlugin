@@ -43,9 +43,13 @@ public class MainWindow : Window, IDisposable
     }
     private void RenderTopBar()
     {
+        // Some logic to move button to the right
+        string showSettingsLabel = "Show Settings";
+        float settingsButtonWidth = ImGui.CalcTextSize(showSettingsLabel).X + (ImGui.GetStyle().FramePadding.X * 2);
+        float availableSpace = ImGui.GetContentRegionAvail().X;
+        ImGui.SetCursorPosX(ImGui.GetCursorPosX() + availableSpace - settingsButtonWidth);
 
-
-        if (ImGui.Button("Show Settings"))
+        if (ImGui.Button(showSettingsLabel))
             Plugin.ToggleConfigUI();
     }
     private void RenderTriggersTable()
