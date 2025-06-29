@@ -79,6 +79,10 @@ public class MainWindow : Window, IDisposable
     }
     private void RenderTriggerRow(Trigger trigger, uint rowIndex)
     {
+
+        if (trigger.Key != "custom")
+            ImGui.BeginDisabled();
+
         // # Start row
         ImGui.TableNextRow();
 
@@ -102,10 +106,11 @@ public class MainWindow : Window, IDisposable
         ImGui.TableNextColumn();
         ImGui.Text(trigger.SoundData ?? "");
 
+        if (trigger.Key != "custom")
+            ImGui.EndDisabled();
+
         // # Buttons
         ImGui.TableNextColumn();
-        if (trigger.SoundData == null || trigger.SoundData.Length == 0)
-            ImGui.BeginDisabled();
         if (ImGui.Button($"Play##playbtn-{rowIndex}"))
         {
             if (trigger.SoundData != null)
@@ -113,8 +118,6 @@ public class MainWindow : Window, IDisposable
             else
                 Log.Debug("trigger has no sounddata to play");
         }
-        if (trigger.SoundData == null || trigger.SoundData.Length == 0)
-            ImGui.EndDisabled();
 
     }
     private void RenderChatTypeDropDown(Trigger trigger, uint rowIndex)
