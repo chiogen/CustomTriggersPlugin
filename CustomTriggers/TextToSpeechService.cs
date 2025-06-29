@@ -1,11 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Speech.Synthesis;
 using Serilog;
-using Dalamud.Plugin.Services;
 
 namespace CustomTriggersPlugin;
 
@@ -21,10 +17,6 @@ internal class TextToSpeechService : IDisposable
     {
         Plugin = plugin;
 
-        //Synthesizer.SetOutputToDefaultAudioDevice();
-        Synthesizer.Volume = 50;
-        Synthesizer.Rate = 0;
-
         foreach (var v in Synthesizer.GetInstalledVoices())
             InstalledVoices.Add(v.VoiceInfo.Name);
     }
@@ -39,6 +31,8 @@ internal class TextToSpeechService : IDisposable
     {
         try
         {
+            Synthesizer.Volume = Plugin.Configuration.Volume;
+
             if (Plugin.Configuration.Debug)
                 Log.Debug($"Sending message to synthesizer: {message}");
 

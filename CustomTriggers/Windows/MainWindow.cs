@@ -71,6 +71,8 @@ public class MainWindow : Window, IDisposable
                 foreach (Trigger trigger in Plugin.Configuration.Triggers)
                     RenderTriggerRow(trigger, rowIndex++);
 
+                RenderNewEntryRow();
+
                 ImGui.EndTable();
                 ImGui.PopStyleVar();
             }
@@ -80,11 +82,11 @@ public class MainWindow : Window, IDisposable
     private void RenderTriggerRow(Trigger trigger, uint rowIndex)
     {
 
-        if (trigger.Key != "custom")
-            ImGui.BeginDisabled();
-
         // # Start row
         ImGui.TableNextRow();
+
+        if (trigger.Key != "custom")
+            ImGui.BeginDisabled();
 
         // # index
         ImGui.TableNextColumn();
@@ -118,6 +120,22 @@ public class MainWindow : Window, IDisposable
             else
                 Log.Debug("trigger has no sounddata to play");
         }
+
+    }
+    private void RenderNewEntryRow()
+    {
+        string key = "";
+        string pattern = "";
+        string soundData = "";
+
+        ImGui.TableNextRow();
+
+        ImGui.TableNextColumn();
+        ImGui.Text("custom");
+
+        ImGui.TableNextColumn();
+        ImGui.InputText("##inputKey", ref key, 20);
+
 
     }
     private void RenderChatTypeDropDown(Trigger trigger, uint rowIndex)
@@ -158,4 +176,5 @@ public class MainWindow : Window, IDisposable
             Plugin.Configuration.Save();
         }
     }
+
 }

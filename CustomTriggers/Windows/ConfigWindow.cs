@@ -43,6 +43,14 @@ public class ConfigWindow : Window, IDisposable
             Configuration.Save();
         }
 
+        //
+        int volume = Configuration.Volume;
+        if (ImGui.SliderInt("Volume", ref volume, 0, 100))
+        {
+            Configuration.Volume = volume;
+            Configuration.Save();
+        }
+
         // 
         bool hasDeepDungeonTriggers = Configuration.Triggers.Any(t => t.Key == "DeepDungeon");
         if (hasDeepDungeonTriggers)
