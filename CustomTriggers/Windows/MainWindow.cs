@@ -92,9 +92,6 @@ public class MainWindow : Window, IDisposable
         // # Start row
         ImGui.TableNextRow();
 
-        if (trigger.Key != "custom")
-            ImGui.BeginDisabled();
-
         // # index
         ImGui.TableNextColumn();
         ImGuiHelpers.SafeTextWrapped(rowIndex.ToString());
@@ -106,7 +103,7 @@ public class MainWindow : Window, IDisposable
         // # ChatType
         ImGui.TableNextColumn();
         ChatType? chatType = trigger.ChatType;
-        if (RenderChatTypeDropDown(rowIndex, ref chatType))
+        if (RenderChatTypeDropDown(rowIndex, ref chatType, trigger.Key != "custom"))
         {
             trigger.ChatType = chatType;
             Plugin.Configuration.Save();
@@ -118,10 +115,13 @@ public class MainWindow : Window, IDisposable
 
         // # SoundText
         ImGui.TableNextColumn();
-        ImGuiHelpers.SafeTextWrapped(trigger.SoundData ?? "");
-
-        if (trigger.Key != "custom")
-            ImGui.EndDisabled();
+        ImGui.SetNextItemWidth(-1);
+        string soundData = trigger.SoundData;
+        if (ImGui.InputText($"##updateSoundData{rowIndex}", ref soundData, 20))
+        {
+            trigger.SoundData = soundData;
+            Plugin.Configuration.Save();
+        }
 
         // # Buttons Cell (render all buttons into 1 cell)
         ImGui.TableNextColumn();
@@ -135,17 +135,11 @@ public class MainWindow : Window, IDisposable
         }
         // Delete Button
         ImGui.SameLine();
-        if (trigger.Key != "custom")
-            ImGui.BeginDisabled();
-        if (ImGui.Button($"Del##btnDel-{rowIndex}"))
+        if (ImGuiToolkit.Button($"Del##btnDel-{rowIndex}", trigger.Key != "custom"))
         {
             Plugin.Configuration.Triggers.Remove(trigger);
             Plugin.Configuration.Save();
         }
-        if (trigger.Key != "custom")
-            ImGui.EndDisabled();
-
-
 
     }
 
@@ -165,7 +159,7 @@ public class MainWindow : Window, IDisposable
         // # ChatType
         ImGui.TableNextColumn();
         ChatType? chatType = draftTrigger.ChatType;
-        if (RenderChatTypeDropDown(rowIndex, ref chatType))
+        if (RenderChatTypeDropDown(rowIndex, ref chatType, false))
             draftTrigger.ChatType = chatType;
 
         // # Pattern
@@ -185,20 +179,16 @@ public class MainWindow : Window, IDisposable
         // # Add Button
         ImGui.TableNextColumn();
         bool dataValid = pattern.Length > 0 && soundData.Length > 0;
-        if (!dataValid)
-            ImGui.BeginDisabled();
-        if (ImGui.Button("+##btnAddEntry"))
+        if (ImGuiToolkit.Button("+##btnAddEntry", !dataValid))
         {
             Plugin.Configuration.Triggers.Add(draftTrigger);
             draftTrigger = new();
             Plugin.Configuration.Save();
         }
-        if (!dataValid)
-            ImGui.EndDisabled();
 
 
     }
-    private bool RenderChatTypeDropDown(uint rowIndex, ref ChatType? currentValue)
+    private bool RenderChatTypeDropDown(uint rowIndex, ref ChatType? currentValue, bool disabled)
     {
         bool valueChanged = false;
 
@@ -207,6 +197,9 @@ public class MainWindow : Window, IDisposable
             currentValueText = ChatTypeExt.Name(currentValue.Value);
 
         ImGui.SetNextItemWidth(-1);
+
+        if (disabled)
+            ImGui.BeginDisabled();
 
         if (ImGui.BeginCombo($"##cbox-{rowIndex}", currentValueText))
         {
@@ -234,6 +227,9 @@ public class MainWindow : Window, IDisposable
 
             ImGui.EndCombo();
         }
+
+        if (disabled)
+            ImGui.EndDisabled();
 
         return valueChanged;
     }

@@ -56,4 +56,5 @@ internal static class TriggerPresets
 
         return triggers;
     }
+
 }
