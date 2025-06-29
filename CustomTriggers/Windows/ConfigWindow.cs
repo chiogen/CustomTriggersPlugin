@@ -54,11 +54,15 @@ public class ConfigWindow : Window, IDisposable
         // 
         bool hasDeepDungeonTriggers = Configuration.Triggers.Any(t => t.Key == "DeepDungeon");
         if (hasDeepDungeonTriggers)
-            ImGui.BeginDisabled();
-        if (ImGui.Button("Add DeepDungeon triggers##addDDTriggers"))
-            AddDeepDungeonTriggers();
-        if (hasDeepDungeonTriggers)
-            ImGui.EndDisabled();
+        {
+            if (ImGui.Button("Delete DeepDungeon triggers##deleteDDTriggers"))
+                DeleteDeepDungeonTriggers();
+        }
+        else
+        {
+            if (ImGui.Button("Add DeepDungeon triggers##addDDTriggers"))
+                AddDeepDungeonTriggers();
+        }
 
         //
         if (ImGui.Button("Clear Triggers##clearAllTriggers"))
@@ -70,6 +74,16 @@ public class ConfigWindow : Window, IDisposable
     {
         Configuration.Triggers.AddRange(TriggerPresets.GetDeepDungeonTriggers());
         Configuration.Save();
+    }
+
+    private void DeleteDeepDungeonTriggers()
+    {
+        bool dataChanged = false;
+
+        Configuration.Triggers.RemoveAll(trigger => trigger.Key == "DeepDungeon");
+
+        if (dataChanged)
+            Configuration.Save();
     }
 
     private void ClearTriggers()
