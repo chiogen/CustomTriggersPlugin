@@ -48,11 +48,13 @@ internal class MessageManager : IDisposable
 
         foreach (Trigger trigger in Plugin.Configuration.Triggers)
         {
-            if (trigger.ChatType != null && trigger.ChatType != chatType)
-                continue;
-
-            if (Regex.IsMatch(message, trigger.Pattern))
-                Plugin.TextToSpeechService.Speak(trigger.SoundData ?? message);
+            if (trigger.ChatType == null || trigger.ChatType == chatType)
+            {
+                if (trigger.CompiledPattern.IsMatch(message))
+                {
+                    Plugin.TextToSpeechService.Speak(trigger.SoundData ?? message);
+                }
+            }
         }
     }
 

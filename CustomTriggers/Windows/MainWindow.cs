@@ -181,6 +181,7 @@ public class MainWindow : Window, IDisposable
         bool dataValid = pattern.Length > 0 && soundData.Length > 0;
         if (ImGuiToolkit.Button("+##btnAddEntry", !dataValid))
         {
+            draftTrigger.UpdatePattern(draftTrigger.Pattern);
             Plugin.Configuration.Triggers.Add(draftTrigger);
             draftTrigger = new();
             Plugin.Configuration.Save();
