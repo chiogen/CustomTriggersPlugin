@@ -42,9 +42,18 @@ internal class MessageManager : IDisposable
 
     public void ProcessMessage(ChatType chatType, string message)
     {
+        bool debug = Plugin.Configuration.Debug;
+
         // No need to do anything, if we got no triggers
         if (Plugin.Configuration.Triggers.Count == 0)
             return;
+
+        // Check for chat types to ignore
+        switch (chatType)
+        {
+            case ChatType.Debug:
+                return;
+        }
 
         foreach (Trigger trigger in Plugin.Configuration.Triggers)
         {
@@ -52,6 +61,9 @@ internal class MessageManager : IDisposable
             {
                 if (trigger.CompiledPattern.IsMatch(message))
                 {
+                    if (debug)
+                        Log.Debug($"Match: ChatType={chatType.ToString() ?? null}|{trigger.ChatType?.ToString() ?? "null"} Pattern=\"{trigger.CompiledPattern.ToString()}\" Message=\"{message}\"");
+
                     Plugin.TextToSpeechService.Speak(trigger.SoundData ?? message);
                 }
             }
