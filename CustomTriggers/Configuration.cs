@@ -14,6 +14,7 @@ public class Configuration : IPluginConfiguration
 
     // Settings
     public int Volume { get; set; } = 50;
+    public bool EnableSoundQueue { get; set; } = false;
 
     // Data
     public List<Trigger> Triggers { get; set; } = [];

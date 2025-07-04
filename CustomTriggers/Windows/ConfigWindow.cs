@@ -50,6 +50,12 @@ public class ConfigWindow : Window, IDisposable
             Configuration.Volume = volume;
             Configuration.Save();
         }
+        bool enableSoundQueue = Configuration.EnableSoundQueue;
+        if (ImGui.Checkbox("Enable SoundQueue", ref enableSoundQueue))
+        {
+            Configuration.EnableSoundQueue = enableSoundQueue;
+            Configuration.Save();
+        }
 
         // 
         bool hasDeepDungeonTriggers = Configuration.Triggers.Any(t => t.Key == "DeepDungeon");

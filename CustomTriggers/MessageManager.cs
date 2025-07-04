@@ -57,16 +57,15 @@ internal class MessageManager : IDisposable
 
         foreach (Trigger trigger in Plugin.Configuration.Triggers)
         {
-            if (trigger.ChatType == null || trigger.ChatType == chatType)
-            {
-                if (trigger.CompiledPattern.IsMatch(message))
-                {
-                    if (debug)
-                        Log.Debug($"Match: ChatType={chatType.ToString() ?? null}|{trigger.ChatType?.ToString() ?? "null"} Pattern=\"{trigger.CompiledPattern.ToString()}\" Message=\"{message}\"");
+            if (trigger.ChatType != null && trigger.ChatType != chatType)
+                continue;
+            if (!trigger.CompiledPattern.IsMatch(message))
+                continue;
 
-                    Plugin.TextToSpeechService.Speak(trigger.SoundData ?? message);
-                }
-            }
+            if (debug)
+                Log.Debug($"Match: ChatType={chatType.ToString() ?? null}|{trigger.ChatType?.ToString() ?? "null"} Pattern=\"{trigger.CompiledPattern}\" Message=\"{message}\"");
+
+            Plugin.TextToSpeechService.Speak(trigger.SoundData ?? message);
         }
     }
 
