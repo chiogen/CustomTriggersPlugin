@@ -93,7 +93,10 @@ public class MainWindow : Window, IDisposable
 
 
                 if (triggersToDelete.Count > 0)
+                {
                     Plugin.Configuration.DeleteTriggers(triggersToDelete);
+                    triggersToDelete.Clear();
+                }
             }
         }
 
