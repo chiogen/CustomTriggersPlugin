@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Numerics;
 using CustomTriggersPlugin.Enums;
 using Dalamud.Interface.Utility;
@@ -75,19 +76,31 @@ public class MainWindow : Window, IDisposable
                 ImGui.TableHeadersRow();
                 uint rowIndex = 0;
 
+                // Store triggers to delete in a list here, and delete them after the render completes
+                List<Trigger> triggersToDelete = [];
+
                 foreach (Trigger trigger in Plugin.Configuration.Triggers)
-                    RenderTriggerRow(trigger, rowIndex++);
+                {
+                    RenderTriggerRow(trigger, rowIndex++, out bool delete);
+                    if (delete)
+                        triggersToDelete.Add(trigger);
+                }
 
                 RenderNewEntryRow(rowIndex++);
 
                 ImGui.EndTable();
                 ImGui.PopStyleVar();
+
+
+                if (triggersToDelete.Count > 0)
+                    Plugin.Configuration.DeleteTriggers(triggersToDelete);
             }
         }
 
     }
-    private void RenderTriggerRow(Trigger trigger, uint rowIndex)
+    private void RenderTriggerRow(Trigger trigger, uint rowIndex, out bool delete)
     {
+        delete = false;
 
         // # Start row
         ImGui.TableNextRow();
@@ -136,10 +149,7 @@ public class MainWindow : Window, IDisposable
         // Delete Button
         ImGui.SameLine();
         if (ImGuiToolkit.Button($"Del##btnDel-{rowIndex}", trigger.Key != "custom"))
-        {
-            Plugin.Configuration.Triggers.Remove(trigger);
-            Plugin.Configuration.Save();
-        }
+            delete = true;
 
     }
 
@@ -182,9 +192,7 @@ public class MainWindow : Window, IDisposable
         if (ImGuiToolkit.Button("+##btnAddEntry", !dataValid))
         {
             draftTrigger.UpdatePattern(draftTrigger.Pattern);
-            Plugin.Configuration.Triggers.Add(draftTrigger);
-            draftTrigger = new();
-            Plugin.Configuration.Save();
+            Plugin.Configuration.AddTrigger(draftTrigger);
         }
 
     }
