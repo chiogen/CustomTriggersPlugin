@@ -53,6 +53,9 @@ internal static class TriggerPresets
 
         add("Magicite", "You obtain a splinter of (Crag|Vortex|Elder|Inferno) magicite\\.", "Magicite");
         add("DreadBeast", "A dread beast stalks this floor\\.\\.\\.", "Danger");
+        //add("Unei", "You return the Unei demiclone to the coffer\\. You cannot carry any more of that item\\.", "Unei");
+        //add("Doga", "You return the Unei demiclone to the coffer\\. You cannot carry any more of that item\\.", "Doga");
+        //add("Onion Knight", "You return the onion knight demiclone to the coffer\\. You cannot carry any more of that item\\.", "Onion");
 
         return triggers;
     }

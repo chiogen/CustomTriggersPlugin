@@ -65,7 +65,7 @@ public class MainWindow : Window, IDisposable
         {
             ImGui.PushStyleVar(ImGuiStyleVar.CellPadding, new Vector2(10, 2)); // X and Y padding
 
-            if (ImGui.BeginTable("TriggerTable", 6))
+            if (ImGui.BeginTable("TriggerTable", 7))
             {
                 ImGui.TableSetupColumn("#", ImGuiTableColumnFlags.WidthFixed, 30f);
                 ImGui.TableSetupColumn("Key", ImGuiTableColumnFlags.WidthFixed, 150f);
@@ -125,6 +125,15 @@ public class MainWindow : Window, IDisposable
             Plugin.Configuration.Save();
         }
 
+        // # MatchType
+        ImGui.TableNextColumn();
+        TriggerMatchType matchType = trigger.MatchType;
+        if (RenderMatchTypeDropDown(rowIndex, ref matchType, trigger.Key != "custom"))
+        {
+            trigger.MatchType = matchType;
+            Plugin.Configuration.Save();
+        }
+
         // # Pattern
         ImGui.TableNextColumn();
         ImGuiHelpers.SafeTextWrapped(trigger.Pattern);
@@ -175,6 +184,12 @@ public class MainWindow : Window, IDisposable
         if (RenderChatTypeDropDown(rowIndex, ref chatType, false))
             draftTrigger.ChatType = chatType;
 
+        // # MatchType
+        ImGui.TableNextColumn();
+        TriggerMatchType matchType = draftTrigger.MatchType;
+        if (RenderMatchTypeDropDown(rowIndex, ref matchType, false))
+            draftTrigger.MatchType = matchType;
+
         // # Pattern
         ImGui.TableNextColumn();
         ImGui.SetNextItemWidth(-1);
@@ -212,7 +227,7 @@ public class MainWindow : Window, IDisposable
         if (disabled)
             ImGui.BeginDisabled();
 
-        if (ImGui.BeginCombo($"##cbox-{rowIndex}", currentValueText))
+        if (ImGui.BeginCombo($"##cboxChatType-{rowIndex}", currentValueText))
         {
 
             bool noneSelected = currentValue == null;
@@ -228,6 +243,37 @@ public class MainWindow : Window, IDisposable
             {
                 bool isSelected = value == currentValue;
                 if (ImGui.Selectable(ChatTypeExt.Name(value), isSelected))
+                {
+                    currentValue = value;
+                    valueChanged = true;
+                }
+                if (isSelected)
+                    ImGui.SetItemDefaultFocus();
+            }
+
+            ImGui.EndCombo();
+        }
+
+        if (disabled)
+            ImGui.EndDisabled();
+
+        return valueChanged;
+    }
+    private static bool RenderMatchTypeDropDown(uint rowIndex, ref TriggerMatchType currentValue, bool disabled)
+    {
+        bool valueChanged = false;
+
+        ImGui.SetNextItemWidth(-1);
+
+        if (disabled)
+            ImGui.BeginDisabled();
+
+        if (ImGui.BeginCombo($"##cboxMatchType-{rowIndex}", currentValue.ToString()))
+        {
+            foreach (TriggerMatchType value in Enum.GetValues<TriggerMatchType>())
+            {
+                bool isSelected = value == currentValue;
+                if (ImGui.Selectable(value.ToString(), isSelected))
                 {
                     currentValue = value;
                     valueChanged = true;

@@ -3,6 +3,7 @@ using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
 using Serilog;
 using System;
+using System.IO;
 using System.Text.RegularExpressions;
 
 namespace CustomTriggersPlugin;
@@ -59,7 +60,7 @@ internal class MessageManager : IDisposable
         {
             if (trigger.ChatType != null && trigger.ChatType != chatType)
                 continue;
-            if (!trigger.CompiledPattern.IsMatch(message))
+            if (!MatchMessageOnTrigger(trigger, message))
                 continue;
 
             if (debug)
@@ -67,6 +68,23 @@ internal class MessageManager : IDisposable
 
             Plugin.TextToSpeechService.Speak(trigger.SoundData ?? message);
         }
+    }
+
+    public bool MatchMessageOnTrigger(Trigger trigger, string message)
+    {
+        if (message.Length == 0)
+            return false;
+
+
+        return trigger.MatchType switch
+        {
+            TriggerMatchType.Regex => trigger.CompiledPattern.IsMatch(message),
+            TriggerMatchType.Equals => message.Equals(trigger.Pattern, StringComparison.OrdinalIgnoreCase),
+            TriggerMatchType.StartsWith => message.StartsWith(trigger.Pattern, StringComparison.OrdinalIgnoreCase),
+            TriggerMatchType.EndsWith => message.EndsWith(trigger.Pattern, StringComparison.OrdinalIgnoreCase),
+            TriggerMatchType.Contains => message.Contains(trigger.Pattern, StringComparison.OrdinalIgnoreCase),
+            _ => false,
+        };
     }
 
 
