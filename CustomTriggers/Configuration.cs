@@ -1,3 +1,4 @@
+using CustomTriggersPlugin.Triggers;
 using Dalamud.Configuration;
 using System;
 using System.Collections.Generic;
@@ -18,18 +19,18 @@ public class Configuration : IPluginConfiguration
     public bool EnableSoundQueue { get; set; } = false;
 
     // Triggers
-    public List<Trigger> Triggers { get; set; } = [];
-    public void AddTrigger(Trigger trigger)
+    public List<BasicTrigger> Triggers { get; set; } = [];
+    public void AddTrigger(BasicTrigger trigger)
     {
         Triggers.Add(trigger);
         Save();
     }
-    public void DeleteTrigger(Trigger trigger)
+    public void DeleteTrigger(BasicTrigger trigger)
     {
         if (Triggers.Remove(trigger))
             Save();
     }
-    public void DeleteTriggers(List<Trigger> triggersToDelete)
+    public void DeleteTriggers(List<BasicTrigger> triggersToDelete)
     {
         Triggers.RemoveAll(trigger => triggersToDelete.Contains(trigger));
         Save();

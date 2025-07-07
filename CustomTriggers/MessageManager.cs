@@ -1,8 +1,10 @@
 using CustomTriggersPlugin.Enums;
+using CustomTriggersPlugin.Triggers;
 using Dalamud.Game.Text;
 using Dalamud.Game.Text.SeStringHandling;
 using Serilog;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
 
@@ -56,35 +58,51 @@ internal class MessageManager : IDisposable
                 return;
         }
 
-        foreach (Trigger trigger in Plugin.Configuration.Triggers)
+        foreach (ITrigger trigger in Plugin.Configuration.Triggers)
         {
             if (trigger.ChatType != null && trigger.ChatType != chatType)
                 continue;
             if (!MatchMessageOnTrigger(trigger, message))
                 continue;
 
-            if (debug)
-                Log.Debug($"Match: ChatType={chatType.ToString() ?? null}|{trigger.ChatType?.ToString() ?? "null"} Pattern=\"{trigger.CompiledPattern}\" Message=\"{message}\"");
+            if (trigger.Pattern.Length == 0)
+
+
+                if (debug)
+                    Log.Debug($"Match: ChatType={chatType.ToString() ?? null}|{trigger.ChatType?.ToString() ?? "null"} Pattern=\"{trigger.Pattern}\" Message=\"{message}\"");
 
             Plugin.TextToSpeechService.Speak(trigger.SoundData ?? message);
         }
     }
 
-    public bool MatchMessageOnTrigger(Trigger trigger, string message)
+    public bool MatchMessageOnTrigger(ITrigger trigger, string message)
     {
         if (message.Length == 0)
             return false;
 
-
         return trigger.MatchType switch
         {
-            TriggerMatchType.Regex => trigger.CompiledPattern.IsMatch(message),
+            TriggerMatchType.Regex => GetTriggerCompiledPattern(trigger).IsMatch(message),
             TriggerMatchType.Equals => message.Equals(trigger.Pattern, StringComparison.OrdinalIgnoreCase),
             TriggerMatchType.StartsWith => message.StartsWith(trigger.Pattern, StringComparison.OrdinalIgnoreCase),
             TriggerMatchType.EndsWith => message.EndsWith(trigger.Pattern, StringComparison.OrdinalIgnoreCase),
             TriggerMatchType.Contains => message.Contains(trigger.Pattern, StringComparison.OrdinalIgnoreCase),
             _ => false,
         };
+    }
+
+    private static readonly Dictionary<ITrigger, Regex> CompiledRegexStore = [];
+    private static Regex GetTriggerCompiledPattern(ITrigger trigger)
+    {
+        if (trigger is BasicTrigger basicTrigger)
+            return basicTrigger.GetCompiledPattern();
+
+        if (CompiledRegexStore.TryGetValue(trigger, out Regex cachedCompiledRegex))
+            return cachedCompiledRegex;
+
+        Regex compiledRegex = new Regex(trigger.Pattern, RegexOptions.Compiled);
+        CompiledRegexStore.Add(trigger, compiledRegex);
+        return compiledRegex;
     }
 
 

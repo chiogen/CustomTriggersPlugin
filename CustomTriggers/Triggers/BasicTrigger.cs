@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 
-namespace CustomTriggersPlugin;
+namespace CustomTriggersPlugin.Triggers;
 
 public enum TriggerMatchType
 {
@@ -16,34 +16,44 @@ public enum TriggerMatchType
 }
 
 [Serializable]
-public class Trigger
+public class BasicTrigger : ITrigger
 {
     public string Key { get; set; } = "custom";
     public string Name { get; set; } = "";
     public ChatType? ChatType { get; set; }
-    public TriggerMatchType MatchType { get; set; } = TriggerMatchType.Regex;
+    public TriggerMatchType MatchType { get; set; } = TriggerMatchType.Equals;
     public string Pattern { get; set; } = "";
     public string SoundData { get; set; } = "";
 
     [JsonIgnore]
     [Newtonsoft.Json.JsonIgnore]
-    public Regex CompiledPattern { get; private set; }
+    public Regex? CompiledPattern { get; private set; }
 
-    public Trigger()
+    public BasicTrigger()
     {
-        CompiledPattern = new Regex(Pattern, RegexOptions.Compiled);
+        if (MatchType == TriggerMatchType.Regex)
+            CompiledPattern = new Regex(Pattern, RegexOptions.Compiled);
     }
 
     [OnDeserialized]
     public void OnDeserialized(StreamingContext context)
     {
-        CompiledPattern = new Regex(Pattern, RegexOptions.Compiled);
+        if (MatchType == TriggerMatchType.Regex)
+            CompiledPattern = new Regex(Pattern, RegexOptions.Compiled);
     }
 
     public void UpdatePattern(string pattern)
     {
         Pattern = pattern;
-        CompiledPattern = new Regex(Pattern, RegexOptions.Compiled);
+
+        if (MatchType == TriggerMatchType.Regex)
+            CompiledPattern = new Regex(Pattern, RegexOptions.Compiled);
+    }
+
+    public Regex GetCompiledPattern()
+    {
+        CompiledPattern ??= new Regex(Pattern, RegexOptions.Compiled);
+        return CompiledPattern;
     }
 
 }

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using CustomTriggersPlugin.Enums;
+using CustomTriggersPlugin.Triggers;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
@@ -70,6 +71,7 @@ public class MainWindow : Window, IDisposable
                 ImGui.TableSetupColumn("#", ImGuiTableColumnFlags.WidthFixed, 30f);
                 ImGui.TableSetupColumn("Key", ImGuiTableColumnFlags.WidthFixed, 150f);
                 ImGui.TableSetupColumn("ChatType", ImGuiTableColumnFlags.WidthFixed, 150f);
+                ImGui.TableSetupColumn("MatchType", ImGuiTableColumnFlags.WidthFixed, 150f);
                 ImGui.TableSetupColumn("Pattern", ImGuiTableColumnFlags.WidthStretch);
                 ImGui.TableSetupColumn("SoundData", ImGuiTableColumnFlags.WidthFixed, 200f);
                 ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthFixed, 100f);
@@ -77,9 +79,9 @@ public class MainWindow : Window, IDisposable
                 uint rowIndex = 0;
 
                 // Store triggers to delete in a list here, and delete them after the render completes
-                List<Trigger> triggersToDelete = [];
+                List<BasicTrigger> triggersToDelete = [];
 
-                foreach (Trigger trigger in Plugin.Configuration.Triggers)
+                foreach (BasicTrigger trigger in Plugin.Configuration.Triggers)
                 {
                     RenderTriggerRow(trigger, rowIndex++, out bool delete);
                     if (delete)
@@ -101,7 +103,7 @@ public class MainWindow : Window, IDisposable
         }
 
     }
-    private void RenderTriggerRow(Trigger trigger, uint rowIndex, out bool delete)
+    private void RenderTriggerRow(BasicTrigger trigger, uint rowIndex, out bool delete)
     {
         delete = false;
 
@@ -165,7 +167,7 @@ public class MainWindow : Window, IDisposable
 
     }
 
-    private Trigger draftTrigger = new();
+    private BasicTrigger draftTrigger = new();
     private void RenderNewEntryRow(uint rowIndex)
     {
         ImGui.TableNextRow();
