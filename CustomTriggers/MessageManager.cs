@@ -93,8 +93,9 @@ internal class MessageManager : IDisposable
         if (trigger is Trigger basicTrigger)
             return basicTrigger.GetCompiledPattern();
 
-        if (CompiledRegexStore.TryGetValue(trigger, out Regex cachedCompiledRegex))
-            return cachedCompiledRegex;
+        if (CompiledRegexStore.TryGetValue(trigger, out Regex? cachedCompiledRegex))
+            if (cachedCompiledRegex != null)
+                return cachedCompiledRegex;
 
         Regex compiledRegex = new Regex(trigger.Pattern, RegexOptions.Compiled);
         CompiledRegexStore.Add(trigger, compiledRegex);

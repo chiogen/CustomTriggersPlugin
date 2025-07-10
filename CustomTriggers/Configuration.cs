@@ -11,6 +11,9 @@ public class Configuration : IPluginConfiguration
 {
     public int Version { get; set; } = 0;
 
+    // Events
+    public event EventHandler? OnSaved;
+
     // Debug options
     public bool Debug { get; set; } = false;
     public ushort? DebugTestChatType { get; set; }
@@ -43,5 +46,6 @@ public class Configuration : IPluginConfiguration
     public void Save()
     {
         Plugin.PluginInterface.SavePluginConfig(this);
+        OnSaved?.Invoke(this, EventArgs.Empty);
     }
 }

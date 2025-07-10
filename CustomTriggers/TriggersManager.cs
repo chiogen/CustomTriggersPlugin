@@ -17,6 +17,7 @@ namespace CustomTriggersPlugin
         internal TriggersManager(Plugin plugin)
         {
             config = plugin.Configuration;
+            config.OnSaved += OnConfigSaved;
             TryReadFromConfig();
         }
 
@@ -32,6 +33,11 @@ namespace CustomTriggersPlugin
             {
                 return false;
             }
+        }
+
+        private void OnConfigSaved(object? sender, EventArgs e)
+        {
+            // TODO Update triggers list
         }
 
     }
