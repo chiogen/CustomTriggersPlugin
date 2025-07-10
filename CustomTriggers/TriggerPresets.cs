@@ -1,10 +1,6 @@
 using CustomTriggersPlugin.Enums;
 using CustomTriggersPlugin.Triggers;
-using ImGuizmoNET;
-using Lumina.Models.Models;
-using System;
 using System.Collections.Generic;
-using System.IO;
 
 namespace CustomTriggersPlugin;
 

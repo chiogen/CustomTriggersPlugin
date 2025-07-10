@@ -5,7 +5,6 @@ using Dalamud.Game.Text.SeStringHandling;
 using Serilog;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Text.RegularExpressions;
 
 namespace CustomTriggersPlugin;
