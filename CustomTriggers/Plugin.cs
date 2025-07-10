@@ -25,8 +25,9 @@ public sealed class Plugin : IDalamudPlugin
     public readonly WindowSystem WindowSystem = new("CustomTriggers");
     private ConfigWindow ConfigWindow { get; init; }
     private MainWindow MainWindow { get; init; }
-    internal MessageManager MessageManager { get; set; }
-    internal TextToSpeechService TextToSpeechService { get; set; }
+    internal MessageManager MessageManager { get; init; }
+    internal TextToSpeechService TextToSpeechService { get; init; }
+    internal TriggersManager TriggersManager { get; init; }
 
     public Plugin()
     {
@@ -35,9 +36,11 @@ public sealed class Plugin : IDalamudPlugin
         // you might normally want to embed resources and load them from the manifest stream
         string goatImagePath = Path.Combine(PluginInterface.AssemblyLocation.Directory?.FullName!, "goat.png");
 
+        TriggersManager = new(this);
         ConfigWindow = new(this);
         MainWindow = new(this);
         TextToSpeechService = new(this);
+        MessageManager = new(this);
 
         WindowSystem.AddWindow(ConfigWindow);
         WindowSystem.AddWindow(MainWindow);
@@ -56,7 +59,6 @@ public sealed class Plugin : IDalamudPlugin
         // Adds another button that is doing the same but for the main ui of the plugin
         PluginInterface.UiBuilder.OpenMainUi += ToggleMainUI;
 
-        MessageManager = new(this);
 
         // Add a simple message to the log with level set to information
         // Use /xllog to open the log window in-game

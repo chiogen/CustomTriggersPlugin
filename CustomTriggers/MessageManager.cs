@@ -26,16 +26,11 @@ internal class MessageManager : IDisposable
         Plugin.ChatGui.ChatMessage -= OnChatMessage;
     }
 
-    private void OnChatMessage(XivChatType _type, int timestamp, ref SeString sender, ref SeString message, ref bool isHandled)
+    private void OnChatMessage(XivChatType type, int timestamp, ref SeString sender, ref SeString message, ref bool isHandled)
     {
         try
         {
-            ChatType chatType = (ChatType)_type;
-
-            if (Plugin.Configuration.Debug)
-                Log.Debug($"New message: {ChatTypeExt.Name(chatType)}({_type}) {sender.TextValue} {message.TextValue}");
-
-            ProcessMessage(chatType, message.TextValue);
+            ProcessMessage((ChatType)type, message.TextValue);
         }
         catch (Exception ex)
         {
@@ -50,6 +45,9 @@ internal class MessageManager : IDisposable
         // No need to do anything, if we got no triggers
         if (Plugin.Configuration.Triggers.Count == 0)
             return;
+
+        if (Plugin.Configuration.Debug)
+            Log.Debug($"New Message | {ChatTypeExt.Name(chatType)}({chatType}) | {message}");
 
         // Check for chat types to ignore
         switch (chatType)
@@ -66,7 +64,6 @@ internal class MessageManager : IDisposable
                 continue;
 
             if (trigger.Pattern.Length == 0)
-
 
                 if (debug)
                     Log.Debug($"Match: ChatType={chatType.ToString() ?? null}|{trigger.ChatType?.ToString() ?? "null"} Pattern=\"{trigger.Pattern}\" Message=\"{message}\"");
@@ -94,7 +91,7 @@ internal class MessageManager : IDisposable
     private static readonly Dictionary<ITrigger, Regex> CompiledRegexStore = [];
     private static Regex GetTriggerCompiledPattern(ITrigger trigger)
     {
-        if (trigger is BasicTrigger basicTrigger)
+        if (trigger is Trigger basicTrigger)
             return basicTrigger.GetCompiledPattern();
 
         if (CompiledRegexStore.TryGetValue(trigger, out Regex cachedCompiledRegex))

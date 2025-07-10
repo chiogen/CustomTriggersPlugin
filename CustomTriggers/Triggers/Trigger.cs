@@ -16,7 +16,7 @@ public enum TriggerMatchType
 }
 
 [Serializable]
-public class BasicTrigger : ITrigger
+public class Trigger : ITrigger
 {
     public string Key { get; set; } = "custom";
     public string Name { get; set; } = "";
@@ -29,7 +29,7 @@ public class BasicTrigger : ITrigger
     [Newtonsoft.Json.JsonIgnore]
     public Regex? CompiledPattern { get; private set; }
 
-    public BasicTrigger()
+    public Trigger()
     {
         if (MatchType == TriggerMatchType.Regex)
             CompiledPattern = new Regex(Pattern, RegexOptions.Compiled);

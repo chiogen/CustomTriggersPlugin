@@ -41,7 +41,11 @@ public class MainWindow : Window, IDisposable
 
         RenderTopBar();
         ImGui.Spacing();
+        RenderTestRow();
         RenderTriggersTable();
+
+        ImGui.Spacing();
+
     }
     private void RenderTopBar()
     {
@@ -79,9 +83,9 @@ public class MainWindow : Window, IDisposable
                 uint rowIndex = 0;
 
                 // Store triggers to delete in a list here, and delete them after the render completes
-                List<BasicTrigger> triggersToDelete = [];
+                List<Trigger> triggersToDelete = [];
 
-                foreach (BasicTrigger trigger in Plugin.Configuration.Triggers)
+                foreach (Trigger trigger in Plugin.Configuration.Triggers)
                 {
                     RenderTriggerRow(trigger, rowIndex++, out bool delete);
                     if (delete)
@@ -103,7 +107,7 @@ public class MainWindow : Window, IDisposable
         }
 
     }
-    private void RenderTriggerRow(BasicTrigger trigger, uint rowIndex, out bool delete)
+    private void RenderTriggerRow(Trigger trigger, uint rowIndex, out bool delete)
     {
         delete = false;
 
@@ -121,7 +125,8 @@ public class MainWindow : Window, IDisposable
         // # ChatType
         ImGui.TableNextColumn();
         ChatType? chatType = trigger.ChatType;
-        if (RenderChatTypeDropDown(rowIndex, ref chatType, trigger.Key != "custom"))
+        ImGui.SetNextItemWidth(-1);
+        if (RenderChatTypeDropDown($"cboxChatType|{rowIndex}", ref chatType, disabled: trigger.Key != "custom"))
         {
             trigger.ChatType = chatType;
             Plugin.Configuration.Save();
@@ -130,7 +135,7 @@ public class MainWindow : Window, IDisposable
         // # MatchType
         ImGui.TableNextColumn();
         TriggerMatchType matchType = trigger.MatchType;
-        if (RenderMatchTypeDropDown(rowIndex, ref matchType, trigger.Key != "custom"))
+        if (RenderMatchTypeDropDown($"cboxMatchType|{rowIndex}", ref matchType, trigger.Key != "custom"))
         {
             trigger.MatchType = matchType;
             Plugin.Configuration.Save();
@@ -167,7 +172,7 @@ public class MainWindow : Window, IDisposable
 
     }
 
-    private BasicTrigger draftTrigger = new();
+    private Trigger draftTrigger = new();
     private void RenderNewEntryRow(uint rowIndex)
     {
         ImGui.TableNextRow();
@@ -183,13 +188,14 @@ public class MainWindow : Window, IDisposable
         // # ChatType
         ImGui.TableNextColumn();
         ChatType? chatType = draftTrigger.ChatType;
-        if (RenderChatTypeDropDown(rowIndex, ref chatType, false))
+        ImGui.SetNextItemWidth(-1);
+        if (RenderChatTypeDropDown($"cboxChatType|{rowIndex}", ref chatType, disabled: false))
             draftTrigger.ChatType = chatType;
 
         // # MatchType
         ImGui.TableNextColumn();
         TriggerMatchType matchType = draftTrigger.MatchType;
-        if (RenderMatchTypeDropDown(rowIndex, ref matchType, false))
+        if (RenderMatchTypeDropDown($"cboxMatchType|{rowIndex}", ref matchType, false))
             draftTrigger.MatchType = matchType;
 
         // # Pattern
@@ -216,7 +222,7 @@ public class MainWindow : Window, IDisposable
         }
 
     }
-    private static bool RenderChatTypeDropDown(uint rowIndex, ref ChatType? currentValue, bool disabled)
+    private static bool RenderChatTypeDropDown(string key, ref ChatType? currentValue, bool disabled)
     {
         bool valueChanged = false;
 
@@ -224,16 +230,14 @@ public class MainWindow : Window, IDisposable
         if (currentValue != null)
             currentValueText = ChatTypeExt.Name(currentValue.Value);
 
-        ImGui.SetNextItemWidth(-1);
-
         if (disabled)
             ImGui.BeginDisabled();
 
-        if (ImGui.BeginCombo($"##cboxChatType-{rowIndex}", currentValueText))
+        if (ImGui.BeginCombo($"##{key}", currentValueText))
         {
 
             bool noneSelected = currentValue == null;
-            if (ImGui.Selectable($"None##clear-{rowIndex}", noneSelected))
+            if (ImGui.Selectable($"None##{key}|none", noneSelected))
             {
                 currentValue = null;
                 valueChanged = true;
@@ -241,10 +245,17 @@ public class MainWindow : Window, IDisposable
             if (currentValue == null)
                 ImGui.SetItemDefaultFocus();
 
+            ushort customValue = (ushort)(currentValue ?? 0);
+            if (ImGuiToolkit.InputUShort("##{key}|InputInt", ref customValue))
+            {
+                currentValue = (ChatType)customValue;
+                valueChanged = true;
+            }
+
             foreach (ChatType value in Enum.GetValues<ChatType>())
             {
                 bool isSelected = value == currentValue;
-                if (ImGui.Selectable(ChatTypeExt.Name(value), isSelected))
+                if (ImGui.Selectable($"{ChatTypeExt.Name(value)}##{key}|{value}", isSelected))
                 {
                     currentValue = value;
                     valueChanged = true;
@@ -261,7 +272,7 @@ public class MainWindow : Window, IDisposable
 
         return valueChanged;
     }
-    private static bool RenderMatchTypeDropDown(uint rowIndex, ref TriggerMatchType currentValue, bool disabled)
+    private static bool RenderMatchTypeDropDown(string key, ref TriggerMatchType currentValue, bool disabled)
     {
         bool valueChanged = false;
 
@@ -270,12 +281,12 @@ public class MainWindow : Window, IDisposable
         if (disabled)
             ImGui.BeginDisabled();
 
-        if (ImGui.BeginCombo($"##cboxMatchType-{rowIndex}", currentValue.ToString()))
+        if (ImGui.BeginCombo($"##{key}", currentValue.ToString()))
         {
             foreach (TriggerMatchType value in Enum.GetValues<TriggerMatchType>())
             {
                 bool isSelected = value == currentValue;
-                if (ImGui.Selectable(value.ToString(), isSelected))
+                if (ImGui.Selectable($"{value}##{key}|{value}", isSelected))
                 {
                     currentValue = value;
                     valueChanged = true;
@@ -291,6 +302,45 @@ public class MainWindow : Window, IDisposable
             ImGui.EndDisabled();
 
         return valueChanged;
+    }
+
+    private void RenderTestRow()
+    {
+        if (ImGui.BeginTable("TestArea", 3))
+        {
+            ImGui.PushStyleVar(ImGuiStyleVar.CellPadding, new Vector2(10, 2)); // X and Y padding
+
+            ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthFixed, 150f);
+            ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthStretch);
+            ImGui.TableSetupColumn("", ImGuiTableColumnFlags.WidthFixed, 100f);
+
+            ImGui.TableNextColumn();
+            ChatType? chatType = (ChatType?)Plugin.Configuration.DebugTestChatType;
+            ImGui.SetNextItemWidth(-1);
+            if (RenderChatTypeDropDown("Test|ChatType", ref chatType, false))
+            {
+                Plugin.Configuration.DebugTestChatType = (ushort?)chatType;
+                Plugin.Configuration.Save();
+            }
+
+            ImGui.TableNextColumn();
+            ImGui.SetNextItemWidth(-1);
+            string message = Plugin.Configuration.DebugTestMessage;
+            if (ImGui.InputText("##testInput", ref message, 255))
+            {
+
+                Plugin.Configuration.DebugTestMessage = message;
+                Plugin.Configuration.Save();
+            }
+
+            ImGui.TableNextColumn();
+            ImGui.SetNextItemWidth(-1);
+            if (ImGui.Button("Send##Test|sendMessage"))
+                Test.Message(Plugin, chatType ?? ChatType.Echo, message);
+
+            ImGui.EndTable();
+            ImGui.PopStyleVar();
+        }
     }
 
 }

@@ -11,26 +11,28 @@ public class Configuration : IPluginConfiguration
 {
     public int Version { get; set; } = 0;
 
-    // General options
+    // Debug options
     public bool Debug { get; set; } = false;
+    public ushort? DebugTestChatType { get; set; }
+    public string DebugTestMessage { get; set; } = "";
 
     // Settings
     public int Volume { get; set; } = 50;
     public bool EnableSoundQueue { get; set; } = false;
 
     // Triggers
-    public List<BasicTrigger> Triggers { get; set; } = [];
-    public void AddTrigger(BasicTrigger trigger)
+    public List<Trigger> Triggers { get; set; } = [];
+    public void AddTrigger(Trigger trigger)
     {
         Triggers.Add(trigger);
         Save();
     }
-    public void DeleteTrigger(BasicTrigger trigger)
+    public void DeleteTrigger(Trigger trigger)
     {
         if (Triggers.Remove(trigger))
             Save();
     }
-    public void DeleteTriggers(List<BasicTrigger> triggersToDelete)
+    public void DeleteTriggers(List<Trigger> triggersToDelete)
     {
         Triggers.RemoveAll(trigger => triggersToDelete.Contains(trigger));
         Save();
