@@ -1,44 +1,54 @@
 using CustomTriggersPlugin.Triggers;
 using System;
+using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CustomTriggersPlugin
 {
-    internal class TriggersManager
+    internal class TriggersManager : IDisposable
     {
         private readonly Configuration config;
-
-        public List<ITrigger> Triggers { get; } = [];
+        private readonly List<Trigger> deepDungeonTriggers;
 
 
         internal TriggersManager(Plugin plugin)
         {
             config = plugin.Configuration;
-            config.OnSaved += OnConfigSaved;
-            TryReadFromConfig();
+            deepDungeonTriggers = TriggerPresets.GetDeepDungeonTriggers();
         }
 
-        private bool TryReadFromConfig()
+        public void Dispose()
         {
-            try
-            {
-                foreach (ITrigger tr in config.Triggers)
-                    Triggers.Add((Trigger)tr);
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
+            deepDungeonTriggers.Clear();
         }
 
-        private void OnConfigSaved(object? sender, EventArgs e)
+
+        public IEnumerable<ITrigger> IterateTriggers()
         {
-            // TODO Update triggers list
+            if (config.UseDeepDungeonsPreset)
+                foreach (var trigger in deepDungeonTriggers)
+                    yield return trigger;
+
+            foreach (var trigger in config.Triggers)
+                yield return trigger;
         }
 
+
+        public void AddTrigger(ITrigger trigger)
+        {
+            config.Triggers.Add(trigger);
+            config.Save();
+        }
+        public void DeleteTrigger(ITrigger trigger)
+        {
+            if (config.Triggers.Remove(trigger))
+                config.Save();
+        }
+        public void DeleteTriggers(List<ITrigger> triggersToDelete)
+        {
+            int nRemoved = config.Triggers.RemoveAll(trigger => triggersToDelete.Contains(trigger));
+            if (nRemoved > 0)
+                config.Save();
+        }
     }
 }

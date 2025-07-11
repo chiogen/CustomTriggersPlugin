@@ -69,6 +69,7 @@ public sealed class Plugin : IDalamudPlugin
     public void Dispose()
     {
         MessageManager.Dispose();
+        TriggersManager.Dispose();
         TextToSpeechService.Dispose();
 
         WindowSystem.RemoveAllWindows();

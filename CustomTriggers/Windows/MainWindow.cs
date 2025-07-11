@@ -70,10 +70,9 @@ public class MainWindow : Window, IDisposable
         {
             ImGui.PushStyleVar(ImGuiStyleVar.CellPadding, new Vector2(10, 2)); // X and Y padding
 
-            if (ImGui.BeginTable("TriggerTable", 7))
+            if (ImGui.BeginTable("TriggerTable", 6))
             {
                 ImGui.TableSetupColumn("#", ImGuiTableColumnFlags.WidthFixed, 30f);
-                ImGui.TableSetupColumn("Key", ImGuiTableColumnFlags.WidthFixed, 150f);
                 ImGui.TableSetupColumn("ChatType", ImGuiTableColumnFlags.WidthFixed, 150f);
                 ImGui.TableSetupColumn("MatchType", ImGuiTableColumnFlags.WidthFixed, 150f);
                 ImGui.TableSetupColumn("Pattern", ImGuiTableColumnFlags.WidthStretch);
@@ -83,9 +82,9 @@ public class MainWindow : Window, IDisposable
                 uint rowIndex = 0;
 
                 // Store triggers to delete in a list here, and delete them after the render completes
-                List<Trigger> triggersToDelete = [];
+                List<ITrigger> triggersToDelete = [];
 
-                foreach (Trigger trigger in Plugin.Configuration.Triggers)
+                foreach (Trigger trigger in Plugin.TriggersManager.IterateTriggers())
                 {
                     RenderTriggerRow(trigger, rowIndex++, out bool delete);
                     if (delete)
@@ -100,7 +99,7 @@ public class MainWindow : Window, IDisposable
 
                 if (triggersToDelete.Count > 0)
                 {
-                    Plugin.Configuration.DeleteTriggers(triggersToDelete);
+                    Plugin.TriggersManager.DeleteTriggers(triggersToDelete);
                     triggersToDelete.Clear();
                 }
             }
@@ -110,6 +109,7 @@ public class MainWindow : Window, IDisposable
     private void RenderTriggerRow(Trigger trigger, uint rowIndex, out bool delete)
     {
         delete = false;
+        bool editDisabled = trigger.IsPreset;
 
         // # Start row
         ImGui.TableNextRow();
@@ -118,15 +118,11 @@ public class MainWindow : Window, IDisposable
         ImGui.TableNextColumn();
         ImGuiHelpers.SafeTextWrapped(rowIndex.ToString());
 
-        // # Key
-        ImGui.TableNextColumn();
-        ImGuiHelpers.SafeTextWrapped(trigger.Key);
-
         // # ChatType
         ImGui.TableNextColumn();
         ChatType? chatType = trigger.ChatType;
         ImGui.SetNextItemWidth(-1);
-        if (RenderChatTypeDropDown($"cboxChatType|{rowIndex}", ref chatType, disabled: trigger.Key != "custom"))
+        if (RenderChatTypeDropDown($"cboxChatType|{rowIndex}", ref chatType, editDisabled))
         {
             trigger.ChatType = chatType;
             Plugin.Configuration.Save();
@@ -135,7 +131,7 @@ public class MainWindow : Window, IDisposable
         // # MatchType
         ImGui.TableNextColumn();
         TriggerMatchType matchType = trigger.MatchType;
-        if (RenderMatchTypeDropDown($"cboxMatchType|{rowIndex}", ref matchType, trigger.Key != "custom"))
+        if (RenderMatchTypeDropDown($"cboxMatchType|{rowIndex}", ref matchType, editDisabled))
         {
             trigger.MatchType = matchType;
             Plugin.Configuration.Save();
@@ -167,7 +163,7 @@ public class MainWindow : Window, IDisposable
         }
         // Delete Button
         ImGui.SameLine();
-        if (ImGuiToolkit.Button($"Del##btnDel-{rowIndex}", trigger.Key != "custom"))
+        if (ImGuiToolkit.Button($"Del##btnDel-{rowIndex}", editDisabled))
             delete = true;
 
     }
@@ -180,10 +176,6 @@ public class MainWindow : Window, IDisposable
         // # no
         ImGui.TableNextColumn();
         ImGuiHelpers.SafeTextWrapped("#");
-
-        // # key
-        ImGui.TableNextColumn();
-        ImGui.Text("custom");
 
         // # ChatType
         ImGui.TableNextColumn();
@@ -218,7 +210,7 @@ public class MainWindow : Window, IDisposable
         if (ImGuiToolkit.Button("+##btnAddEntry", !dataValid))
         {
             draftTrigger.UpdatePattern(draftTrigger.Pattern);
-            Plugin.Configuration.AddTrigger(draftTrigger);
+            Plugin.TriggersManager.AddTrigger(draftTrigger);
         }
 
     }

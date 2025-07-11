@@ -24,23 +24,8 @@ public class Configuration : IPluginConfiguration
     public bool EnableSoundQueue { get; set; } = false;
 
     // Triggers
-    public List<Trigger> Triggers { get; set; } = [];
-    public void AddTrigger(Trigger trigger)
-    {
-        Triggers.Add(trigger);
-        Save();
-    }
-    public void DeleteTrigger(Trigger trigger)
-    {
-        if (Triggers.Remove(trigger))
-            Save();
-    }
-    public void DeleteTriggers(List<Trigger> triggersToDelete)
-    {
-        Triggers.RemoveAll(trigger => triggersToDelete.Contains(trigger));
-        Save();
-    }
-
+    public bool UseDeepDungeonsPreset { get; set; } = false;
+    public List<ITrigger> Triggers { get; set; } = [];
 
     // the below exist just to make saving less cumbersome
     public void Save()

@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Numerics;
 using CustomTriggersPlugin.Enums;
+using CustomTriggersPlugin.Triggers;
 using Dalamud.Interface.Windowing;
 using ImGuiNET;
 
@@ -58,38 +59,17 @@ public class ConfigWindow : Window, IDisposable
         }
 
         // 
-        bool hasDeepDungeonTriggers = Configuration.Triggers.Any(t => t.Key == "DeepDungeon");
-        if (hasDeepDungeonTriggers)
+        bool useDeepDungeonsPreset = Configuration.UseDeepDungeonsPreset;
+        if (ImGui.Checkbox("Use Deep Dungeons Preset", ref useDeepDungeonsPreset))
         {
-            if (ImGui.Button("Delete DeepDungeon triggers##deleteDDTriggers"))
-                DeleteDeepDungeonTriggers();
-        }
-        else
-        {
-            if (ImGui.Button("Add DeepDungeon triggers##addDDTriggers"))
-                AddDeepDungeonTriggers();
+            Configuration.UseDeepDungeonsPreset = useDeepDungeonsPreset;
+            Configuration.Save();
         }
 
         //
         if (ImGui.Button("Clear Triggers##clearAllTriggers"))
             ClearTriggers();
 
-    }
-
-    private void AddDeepDungeonTriggers()
-    {
-        Configuration.Triggers.AddRange(TriggerPresets.GetDeepDungeonTriggers());
-        Configuration.Save();
-    }
-
-    private void DeleteDeepDungeonTriggers()
-    {
-        bool dataChanged = false;
-
-        Configuration.Triggers.RemoveAll(trigger => trigger.Key == "DeepDungeon");
-
-        if (dataChanged)
-            Configuration.Save();
     }
 
     private void ClearTriggers()

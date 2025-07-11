@@ -1,8 +1,7 @@
 using CustomTriggersPlugin.Enums;
-using CustomTriggersPlugin.Triggers;
 using System.Collections.Generic;
 
-namespace CustomTriggersPlugin;
+namespace CustomTriggersPlugin.Triggers;
 
 internal static class TriggerPresets
 {
@@ -10,12 +9,11 @@ internal static class TriggerPresets
     internal static List<Trigger> GetDeepDungeonTriggers()
     {
         List<Trigger> triggers = [];
-        string key = "DeepDungeon";
-        ChatType systemChatType = (ChatType)2105;
+        var systemChatType = (ChatType)2105;
 
         var add = (string name, string pattern, string soundData, TriggerMatchType matchType) => triggers.Add(new()
         {
-            Key = key,
+            IsPreset = true,
             Name = name,
             ChatType = systemChatType,
             MatchType = matchType,
@@ -40,7 +38,7 @@ internal static class TriggerPresets
         };
 
         // Add Exists
-        foreach (string exitName in new[] { "Pylon", "Cairn", "Beacon" })
+        foreach (var exitName in new[] { "Pylon", "Cairn", "Beacon" })
             add("Exit", $"The {exitName} of Passage is activated!", "Exit", TriggerMatchType.Equals);
 
         add("Safety", "All the traps on this floor have disappeared!", "Safety up", TriggerMatchType.Equals);
@@ -69,7 +67,7 @@ internal static class TriggerPresets
         addItem("resolution", "reso");
 
         // Add Magicites
-        foreach (string name in new[] { "Crag", "Vortex", "Elder", "Inferno" })
+        foreach (var name in new[] { "Crag", "Vortex", "Elder", "Inferno" })
             add($"Magicite|{name}", $"You return the splinter of {name} magicite to the coffer. You cannot carry any more of that item.", "Magicite", TriggerMatchType.Equals);
 
         // Add EO specials

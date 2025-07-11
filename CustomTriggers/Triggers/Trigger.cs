@@ -18,7 +18,7 @@ public enum TriggerMatchType
 [Serializable]
 public class Trigger : ITrigger
 {
-    public string Key { get; set; } = "custom";
+    public bool IsPreset { get; init; } = false;
     public string Name { get; set; } = "";
     public ChatType? ChatType { get; set; }
     public TriggerMatchType MatchType { get; set; } = TriggerMatchType.Equals;

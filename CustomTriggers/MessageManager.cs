@@ -42,9 +42,6 @@ internal class MessageManager : IDisposable
         bool debug = Plugin.Configuration.Debug;
 
         // No need to do anything, if we got no triggers
-        if (Plugin.Configuration.Triggers.Count == 0)
-            return;
-
         if (Plugin.Configuration.Debug)
             Log.Debug($"New Message | {ChatTypeExt.Name(chatType)}({chatType}) | {message}");
 
@@ -55,7 +52,7 @@ internal class MessageManager : IDisposable
                 return;
         }
 
-        foreach (ITrigger trigger in Plugin.Configuration.Triggers)
+        foreach (ITrigger trigger in Plugin.TriggersManager.IterateTriggers())
         {
             if (trigger.ChatType != null && trigger.ChatType != chatType)
                 continue;
