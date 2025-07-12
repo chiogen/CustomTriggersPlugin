@@ -5,6 +5,7 @@ using System.IO;
 using Dalamud.Interface.Windowing;
 using Dalamud.Plugin.Services;
 using CustomTriggersPlugin.Windows;
+using System;
 
 namespace CustomTriggersPlugin;
 
@@ -31,8 +32,15 @@ public sealed class Plugin : IDalamudPlugin
 
     public Plugin()
     {
-        Configuration = PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
-
+        try
+        {
+            Configuration = PluginInterface.GetPluginConfig() as Configuration ?? new Configuration();
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Loading config failed. Creating new one.");
+            Configuration = new Configuration();
+        }
         // you might normally want to embed resources and load them from the manifest stream
         string goatImagePath = Path.Combine(PluginInterface.AssemblyLocation.Directory?.FullName!, "goat.png");
 
@@ -49,6 +57,7 @@ public sealed class Plugin : IDalamudPlugin
         {
             HelpMessage = "A useful message to display in /xlhelp"
         });
+        CommandManager.AddHandler("/ct", new CommandInfo(OnCommand));
 
         PluginInterface.UiBuilder.Draw += DrawUI;
 
