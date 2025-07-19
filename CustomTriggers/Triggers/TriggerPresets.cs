@@ -42,6 +42,7 @@ internal static class TriggerPresets
             add("Exit", $"The {exitName} of Passage is activated!", "Exit", TriggerMatchType.Equals);
 
         add("Safety", "All the traps on this floor have disappeared!", "Safety up", TriggerMatchType.Equals);
+        add("Mimic", "The coffer...bares its fangs!", "Mimic", TriggerMatchType.Equals);
 
         addItem("affluence");
         addItem("alteration");
