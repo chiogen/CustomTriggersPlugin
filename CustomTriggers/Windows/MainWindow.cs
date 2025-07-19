@@ -194,14 +194,14 @@ public class MainWindow : Window, IDisposable
         ImGui.TableNextColumn();
         ImGui.SetNextItemWidth(-1);
         string pattern = draftTrigger.Pattern;
-        if (ImGui.InputText("##inputPattern", ref pattern, 20))
+        if (ImGui.InputText("##inputPattern", ref pattern, 255))
             draftTrigger.Pattern = pattern;
 
         // # SoundData
         ImGui.TableNextColumn();
         ImGui.SetNextItemWidth(-1);
         string soundData = draftTrigger.SoundData;
-        if (ImGui.InputText("##inputSoundData", ref soundData, 20))
+        if (ImGui.InputText("##inputSoundData", ref soundData, 25))
             draftTrigger.SoundData = soundData;
 
         // # Add Button
