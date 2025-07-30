@@ -13,17 +13,32 @@ internal class TextToSpeechService : IDisposable
     private Plugin Plugin { get; }
     private SpeechSynthesizer Synthesizer { get; } = new();
 
-    public List<string> InstalledVoices { get; } = [];
+    public string Voice
+    {
+        get
+        {
+            return Synthesizer.Voice.Name;
+        }
+    }
+    public List<InstalledVoice> InstalledVoices { get; init; } = [];
     public Queue<string> MessageQueue { get; } = [];
 
     internal TextToSpeechService(Plugin plugin)
     {
         Plugin = plugin;
 
-        foreach (var v in Synthesizer.GetInstalledVoices())
-            InstalledVoices.Add(v.VoiceInfo.Name);
+        InstalledVoices = [.. Synthesizer.GetInstalledVoices()];
 
+        SelectVoiceFromConfig(this, new EventArgs());
+
+        Plugin.Configuration.OnSaved += SelectVoiceFromConfig;
         Synthesizer.SpeakCompleted += OnSpeakComplete;
+    }
+
+    public void Refresh()
+    {
+        InstalledVoices.Clear();
+        InstalledVoices.AddRange(Synthesizer.GetInstalledVoices());
     }
 
     public void Dispose()
@@ -59,7 +74,22 @@ internal class TextToSpeechService : IDisposable
         }
     }
 
-    public void OnSpeakComplete(object? sender, SpeakCompletedEventArgs ev)
+    private void SelectVoiceFromConfig(object? sender, EventArgs e)
+    {
+        try
+        {
+            if (Plugin.Configuration.Voice != null)
+            {
+                Synthesizer.SelectVoice(Plugin.Configuration.Voice);
+            }
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Failed to apply voice from configuration.");
+        }
+    }
+
+    private void OnSpeakComplete(object? sender, SpeakCompletedEventArgs ev)
     {
         if (!Plugin.Configuration.EnableSoundQueue)
             return;

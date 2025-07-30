@@ -20,6 +20,7 @@ public class Configuration : IPluginConfiguration
     public string DebugTestMessage { get; set; } = "";
 
     // Settings
+    public string? Voice { get; set; }
     public int Volume { get; set; } = 50;
     public bool EnableSoundQueue { get; set; } = false;
 
