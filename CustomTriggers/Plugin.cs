@@ -41,8 +41,6 @@ public sealed class Plugin : IDalamudPlugin
             Log.Error(ex, "Loading config failed. Creating new one.");
             Configuration = new Configuration();
         }
-        // you might normally want to embed resources and load them from the manifest stream
-        string goatImagePath = Path.Combine(PluginInterface.AssemblyLocation.Directory?.FullName!, "goat.png");
 
         TriggersManager = new(this);
         ConfigWindow = new(this);

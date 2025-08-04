@@ -26,7 +26,7 @@ public class Configuration : IPluginConfiguration
 
     // Triggers
     public bool UseDeepDungeonsPreset { get; set; } = false;
-    public List<ITrigger> Triggers { get; set; } = [];
+    public bool UseFateTriggersPreset { get; set; } = false;
 
     // the below exist just to make saving less cumbersome
     public void Save()

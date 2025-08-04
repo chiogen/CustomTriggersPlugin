@@ -6,12 +6,13 @@ namespace CustomTriggersPlugin.Triggers;
 internal static class TriggerPresets
 {
 
-    internal static List<Trigger> GetDeepDungeonTriggers()
+    internal static List<Trigger> GetFateTriggers()
     {
         List<Trigger> triggers = [];
+
         var systemChatType = (ChatType)2105;
 
-        var add = (string name, string pattern, string soundData, TriggerMatchType matchType) => triggers.Add(new()
+        void add(string name, string pattern, string soundData, TriggerMatchType matchType) => triggers.Add(new()
         {
             IsPreset = true,
             Name = name,
@@ -21,7 +22,28 @@ internal static class TriggerPresets
             SoundData = soundData
         });
 
-        var addItem = (string itemName, string? soundData = null) =>
+        add("Fate|Maiden", "The smell of death has drawn a Forlorn maiden to the battlefield!", "Maiden", TriggerMatchType.Equals);
+
+
+        return triggers;
+    }
+
+    internal static List<Trigger> GetDeepDungeonTriggers()
+    {
+        List<Trigger> triggers = [];
+        var systemChatType = (ChatType)2105;
+
+        void add(string name, string pattern, string soundData, TriggerMatchType matchType) => triggers.Add(new()
+        {
+            IsPreset = true,
+            Name = name,
+            ChatType = systemChatType,
+            MatchType = matchType,
+            Pattern = pattern,
+            SoundData = soundData
+        });
+
+        void addItem(string itemName, string? soundData = null)
         {
             add(
                 itemName,
@@ -35,7 +57,7 @@ internal static class TriggerPresets
                 soundData ?? itemName,
                 TriggerMatchType.Equals
             );
-        };
+        }
 
         // Add Exists
         foreach (var exitName in new[] { "Pylon", "Cairn", "Beacon" })

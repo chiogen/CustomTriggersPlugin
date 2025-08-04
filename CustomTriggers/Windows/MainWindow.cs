@@ -82,7 +82,7 @@ public class MainWindow : Window, IDisposable
                 uint rowIndex = 0;
 
                 // Store triggers to delete in a list here, and delete them after the render completes
-                List<ITrigger> triggersToDelete = [];
+                List<Trigger> triggersToDelete = [];
 
                 foreach (Trigger trigger in Plugin.TriggersManager.IterateTriggers())
                 {
@@ -125,7 +125,7 @@ public class MainWindow : Window, IDisposable
         if (RenderChatTypeDropDown($"cboxChatType|{rowIndex}", ref chatType, editDisabled))
         {
             trigger.ChatType = chatType;
-            Plugin.Configuration.Save();
+            Plugin.TriggersManager.Save();
         }
 
         // # MatchType
@@ -134,21 +134,41 @@ public class MainWindow : Window, IDisposable
         if (RenderMatchTypeDropDown($"cboxMatchType|{rowIndex}", ref matchType, editDisabled))
         {
             trigger.MatchType = matchType;
-            Plugin.Configuration.Save();
+            Plugin.TriggersManager.Save();
         }
 
         // # Pattern
         ImGui.TableNextColumn();
-        ImGuiHelpers.SafeTextWrapped(trigger.Pattern);
+        if (editDisabled)
+        {
+            ImGuiHelpers.SafeTextWrapped(trigger.Pattern);
+        }
+        else
+        {
+            string pattern = trigger.Pattern;
+            ImGui.SetNextItemWidth(-1);
+            if (ImGui.InputText($"##pattern{rowIndex}", ref pattern, 2000))
+            {
+                trigger.Pattern = pattern;
+                Plugin.TriggersManager.Save();
+            }
+        }
 
         // # SoundText
         ImGui.TableNextColumn();
         ImGui.SetNextItemWidth(-1);
         string soundData = trigger.SoundData;
-        if (ImGui.InputText($"##updateSoundData{rowIndex}", ref soundData, 20))
+        if (editDisabled)
         {
-            trigger.SoundData = soundData;
-            Plugin.Configuration.Save();
+            ImGuiHelpers.SafeTextWrapped(trigger.SoundData);
+        }
+        else
+        {
+            if (ImGui.InputText($"##soundData{rowIndex}", ref soundData, 20))
+            {
+                trigger.SoundData = soundData;
+                Plugin.TriggersManager.Save();
+            }
         }
 
         // # Buttons Cell (render all buttons into 1 cell)

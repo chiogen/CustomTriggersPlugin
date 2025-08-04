@@ -16,7 +16,7 @@ public enum TriggerMatchType
 }
 
 [Serializable]
-public class Trigger : ITrigger
+public class Trigger
 {
     public bool IsPreset { get; init; } = false;
     public string Name { get; set; } = "";

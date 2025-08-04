@@ -52,7 +52,7 @@ internal class MessageManager : IDisposable
                 return;
         }
 
-        foreach (ITrigger trigger in Plugin.TriggersManager.IterateTriggers())
+        foreach (Trigger trigger in Plugin.TriggersManager.IterateTriggers())
         {
             if (trigger.ChatType != null && trigger.ChatType != chatType)
                 continue;
@@ -68,7 +68,7 @@ internal class MessageManager : IDisposable
         }
     }
 
-    public bool MatchMessageOnTrigger(ITrigger trigger, string message)
+    public bool MatchMessageOnTrigger(Trigger trigger, string message)
     {
         if (message.Length == 0)
             return false;
@@ -84,8 +84,8 @@ internal class MessageManager : IDisposable
         };
     }
 
-    private static readonly Dictionary<ITrigger, Regex> CompiledRegexStore = [];
-    private static Regex GetTriggerCompiledPattern(ITrigger trigger)
+    private static readonly Dictionary<Trigger, Regex> CompiledRegexStore = [];
+    private static Regex GetTriggerCompiledPattern(Trigger trigger)
     {
         if (trigger is Trigger basicTrigger)
             return basicTrigger.GetCompiledPattern();

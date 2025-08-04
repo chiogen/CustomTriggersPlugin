@@ -1,54 +1,122 @@
 using CustomTriggersPlugin.Triggers;
+using Serilog;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using System.Text.Json;
 
-namespace CustomTriggersPlugin
+namespace CustomTriggersPlugin;
+
+internal class TriggersJson
 {
-    internal class TriggersManager : IDisposable
+    public int Version { get; set; } = 1;
+    public List<Trigger> Triggers { get; set; } = [];
+}
+
+internal class TriggersManager : IDisposable
+{
+    private static string fileName = "triggers.json";
+
+    private Plugin Plugin { get; init; }
+    private readonly Configuration config;
+
+    public List<Trigger> Triggers { get; private set; } = [];
+    private readonly List<Trigger> deepDungeonTriggers;
+    private readonly List<Trigger> fateTriggers;
+
+
+
+    internal TriggersManager(Plugin plugin)
     {
-        private readonly Configuration config;
-        private readonly List<Trigger> deepDungeonTriggers;
+        Plugin = plugin;
+        config = plugin.Configuration;
+        deepDungeonTriggers = TriggerPresets.GetDeepDungeonTriggers();
+        fateTriggers = TriggerPresets.GetFateTriggers();
+        Load();
+    }
 
+    public void Dispose()
+    {
+        deepDungeonTriggers.Clear();
+    }
 
-        internal TriggersManager(Plugin plugin)
+    public void Load()
+    {
+        string filePath = Path.Combine(Plugin.PluginInterface.ConfigDirectory.FullName, fileName);
+        if (!File.Exists(filePath))
+            return;
+
+        try
         {
-            config = plugin.Configuration;
-            deepDungeonTriggers = TriggerPresets.GetDeepDungeonTriggers();
+            string importData = File.ReadAllText(filePath);
+
+            TriggersJson? import = JsonSerializer.Deserialize<TriggersJson>(importData);
+            if (import == null)
+                return;
+
+            // maybe in future make a non-deserialized parse here. at least the verison number
+            Triggers = import.Triggers;
+
+            Log.Verbose($"Successfully imported {fileName}");
         }
-
-        public void Dispose()
+        catch (Exception ex)
         {
-            deepDungeonTriggers.Clear();
+            Log.Error(ex, $"Failed loading {fileName}");
         }
-
-
-        public IEnumerable<ITrigger> IterateTriggers()
+    }
+    public void Save()
+    {
+        try
         {
-            if (config.UseDeepDungeonsPreset)
-                foreach (var trigger in deepDungeonTriggers)
-                    yield return trigger;
+            TriggersJson export = new();
+            export.Triggers = Triggers;
 
-            foreach (var trigger in config.Triggers)
+            string exportData = JsonSerializer.Serialize(export);
+
+            string filePath = Path.Combine(Plugin.PluginInterface.ConfigDirectory.FullName, fileName);
+            if (File.Exists(filePath))
+                File.Delete(filePath);
+
+            File.WriteAllText(filePath, exportData);
+            Log.Verbose($"Successfully exported {fileName}");
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, $"Failed saving triggers to {fileName}");
+        }
+    }
+
+
+    public IEnumerable<Trigger> IterateTriggers()
+    {
+        if (config.UseDeepDungeonsPreset)
+            foreach (var trigger in deepDungeonTriggers)
                 yield return trigger;
-        }
+
+        if (config.UseFateTriggersPreset)
+            foreach (var trigger in fateTriggers)
+                yield return trigger;
+
+        foreach (var trigger in Triggers)
+            yield return trigger;
+    }
 
 
-        public void AddTrigger(ITrigger trigger)
-        {
-            config.Triggers.Add(trigger);
-            config.Save();
-        }
-        public void DeleteTrigger(ITrigger trigger)
-        {
-            if (config.Triggers.Remove(trigger))
-                config.Save();
-        }
-        public void DeleteTriggers(List<ITrigger> triggersToDelete)
-        {
-            int nRemoved = config.Triggers.RemoveAll(trigger => triggersToDelete.Contains(trigger));
-            if (nRemoved > 0)
-                config.Save();
-        }
+    public void AddTrigger(Trigger trigger)
+    {
+        Triggers.Add(trigger);
+        Save();
+    }
+    public void DeleteTrigger(Trigger trigger)
+    {
+        if (Triggers.Remove(trigger))
+            Save();
+    }
+    public void DeleteTriggers(List<Trigger> triggersToDelete)
+    {
+        int nRemoved = Triggers.RemoveAll(trigger => triggersToDelete.Contains(trigger));
+        if (nRemoved > 0)
+            Save();
     }
 }

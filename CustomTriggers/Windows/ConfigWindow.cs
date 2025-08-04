@@ -110,13 +110,20 @@ public class ConfigWindow : Window, IDisposable
                 Configuration.UseDeepDungeonsPreset = useDeepDungeonsPreset;
                 Configuration.Save();
             }
+
+            bool useFatesPreset = Configuration.UseFateTriggersPreset;
+            if (ImGui.Checkbox("Fates", ref useFatesPreset))
+            {
+                Configuration.UseFateTriggersPreset = useFatesPreset;
+                Configuration.Save();
+            }
         }
     }
 
     private void ClearTriggers()
     {
-        Configuration.Triggers.Clear();
-        Configuration.Save();
+        Plugin.TriggersManager.Triggers.Clear();
+        Plugin.TriggersManager.Save();
     }
 
 }
