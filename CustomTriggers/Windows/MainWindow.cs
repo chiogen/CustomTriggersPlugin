@@ -211,6 +211,7 @@ public class MainWindow : Window, IDisposable
         {
             draftTrigger.UpdatePattern(draftTrigger.Pattern);
             Plugin.TriggersManager.AddTrigger(draftTrigger);
+            draftTrigger = new();
         }
 
     }
