@@ -16,7 +16,7 @@ internal class TriggersJson
 
 internal class TriggersManager : IDisposable
 {
-    private static string fileName = "triggers.json";
+    private static readonly string FileName = "triggers.json";
 
     private Plugin Plugin { get; init; }
     private readonly Configuration config;
@@ -43,7 +43,7 @@ internal class TriggersManager : IDisposable
 
     public void Load()
     {
-        string filePath = Path.Combine(Plugin.PluginInterface.ConfigDirectory.FullName, fileName);
+        string filePath = Path.Combine(Plugin.PluginInterface.ConfigDirectory.FullName, FileName);
         if (!File.Exists(filePath))
             return;
 
@@ -58,11 +58,11 @@ internal class TriggersManager : IDisposable
             // maybe in future make a non-deserialized parse here. at least the verison number
             Triggers = import.Triggers;
 
-            Log.Verbose($"Successfully imported {fileName}");
+            Log.Verbose($"Successfully imported {FileName}");
         }
         catch (Exception ex)
         {
-            Log.Error(ex, $"Failed loading {fileName}");
+            Log.Error(ex, $"Failed loading {FileName}");
         }
     }
     public void Save()
@@ -74,16 +74,16 @@ internal class TriggersManager : IDisposable
 
             string exportData = JsonSerializer.Serialize(export);
 
-            string filePath = Path.Combine(Plugin.PluginInterface.ConfigDirectory.FullName, fileName);
+            string filePath = Path.Combine(Plugin.PluginInterface.ConfigDirectory.FullName, FileName);
             if (File.Exists(filePath))
                 File.Delete(filePath);
 
             File.WriteAllText(filePath, exportData);
-            Log.Verbose($"Successfully exported {fileName}");
+            Log.Verbose($"Successfully exported {FileName}");
         }
         catch (Exception ex)
         {
-            Log.Error(ex, $"Failed saving triggers to {fileName}");
+            Log.Error(ex, $"Failed saving triggers to {FileName}");
         }
     }
 
