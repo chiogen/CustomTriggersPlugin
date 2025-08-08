@@ -5,7 +5,7 @@ using System.Speech.Synthesis;
 using CustomTriggersPlugin.Enums;
 using CustomTriggersPlugin.Triggers;
 using Dalamud.Interface.Windowing;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 
 namespace CustomTriggersPlugin.Windows;
 

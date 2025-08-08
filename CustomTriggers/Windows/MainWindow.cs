@@ -6,7 +6,7 @@ using CustomTriggersPlugin.Triggers;
 using Dalamud.Interface.Utility;
 using Dalamud.Interface.Utility.Raii;
 using Dalamud.Interface.Windowing;
-using ImGuiNET;
+using Dalamud.Bindings.ImGui;
 using Serilog;
 
 namespace CustomTriggersPlugin.Windows;
