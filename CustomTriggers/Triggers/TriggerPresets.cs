@@ -23,7 +23,7 @@ internal static class TriggerPresets
         });
 
         add("Fate|Maiden", "The smell of death has drawn a Forlorn maiden to the battlefield!", "Maiden", TriggerMatchType.Equals);
-
+        add("Fate|Maiden|Big", "The smell of death has drawn the Forlorn to the battlefield!", "Maiden", TriggerMatchType.Equals);
 
         return triggers;
     }
